@@ -1,0 +1,4 @@
+*.ps1  text working-tree-encoding=UTF-8
+*.psm1 text working-tree-encoding=UTF-8
+*.psd1 text working-tree-encoding=UTF-8
+*.json text working-tree-encoding=UTF-8

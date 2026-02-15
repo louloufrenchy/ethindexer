@@ -22,3 +22,48 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 where = ["forensic_suite_v2"]
+[project]
+name = "forensic-suite-v2"
+version = "0.1.2"
+description = "Forensic Suite v2 – Multi-chain blockchain analysis toolkit"
+requires-python = ">=3.10"
+
+authors = [
+    { name = "Louis", email = "support@netbizint.com.au" }
+]
+
+dependencies = [
+    "click>=8.0",
+    "psycopg2-binary>=2.9",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "pyside6>=6.6",
+]
+
+[project.scripts]
+forensic-suite-v2 = "forensic_suite_v2.cli.__main__:cli"
+forensic-suite-v2-gui = "forensic_suite_v2.gui.app:launch_gui"
+forensic-suite-v2-dashboard = "forensic_suite_v2.cli.__main__:dashboard"
+forensic-suite-v2-run-all = "forensic_suite_v2.cli.__main__:run_all"
+forensic-suite-v2-run-indexer = "forensic_suite_v2.cli.__main__:run_indexer"
+forensic-suite-v2-health = "forensic_suite_v2.cli.__main__:health_api"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["forensic_suite_v2*"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+forensic_suite_v2 = [
+    "dashboards/*.ps1",
+    "config/*.yaml",
+    "gui/*.py",
+    "gui/**/*.py",
+    "gui/**/*.ui",
+    "gui/**/*.png",
+    "gui/**/*.ico",
+    "gui/**/*.qrc",
+    "tools/*.ps1"
+]

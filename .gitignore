@@ -41,3 +41,46 @@ Thumbs.db
 
 # Cache
 .cache/
+# PowerShell build artifacts
+*.psd1
+*.psm1.tmp
+*.ps1.tmp
+
+# Python build artifacts
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+
+# Installer build output
+Output/
+installer_payload/build/
+*.exe
+*.msi
+*.iss.tmp
+
+# Temporary build folders
+build_tmp/
+temp/
+tmp/
+*.log
+*.bak
+
+# Virtual environments
+venv/
+.env/
+.env*/
+
+# IDE/editor noise
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS noise
+Thumbs.db
+.DS_Store
+
+# Git noise
+.git/

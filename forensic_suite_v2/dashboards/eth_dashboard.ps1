@@ -44,11 +44,11 @@ FROM checkpoint, blocks, metrics;
 
     $fields = $result.Split(",")
 
-    $lastIndexed   = [int]$fields[0]
-    $lastBlockRow  = [int]$fields[1]
-    $headBlock     = [int]$fields[2]
+    $lastIndexed = [int]$fields[0]
+    $lastBlockRow = [int]$fields[1]
+    $headBlock = [int]$fields[2]
 
-    $lag       = $headBlock - $lastIndexed
+    $lag = $headBlock - $lastIndexed
     $remaining = $target - $lastIndexed
 
     if ($remaining -gt 0) {

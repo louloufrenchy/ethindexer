@@ -1,0 +1,32 @@
+C:\development\forensic_tracer_installer_project_root\
+│
+├── installer_payload\
+│     └── ForensicSuiteV2-setup.exe
+│
+├── manifests\
+│     └── manifest.psd1
+│
+├── logs\
+│     └── orchestrator.log.json
+│
+├── dashboards\
+│     └── orchestrator.html
+│
+├── tests\
+│     └── dryrun.ps1
+│
+└── ForensicSuite.Orchestrator\
+      │   ForensicSuite.Orchestrator.psd1
+      │   ForensicSuite.Orchestrator.psm1
+      │
+      ├── Public\
+      │     ├── Invoke-Orchestration.ps1
+      │     └── Read-OrchestrationManifest.ps1
+      │
+      └── Private\
+            ├── Invoke-SSH.ps1
+            ├── Invoke-SCP.ps1
+            ├── Invoke-StepParallel.ps1
+            ├── Invoke-Rollback.ps1
+            ├── Test-HostHealth.ps1
+            └── Write-ProgressEvent.ps1

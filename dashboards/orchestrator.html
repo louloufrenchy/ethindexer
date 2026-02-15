@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ForensicSuite Orchestrator Dashboard</title>
+    <style>
+        body { font-family: Arial; background: #111; color: #eee; padding: 20px; }
+        h1 { color: #fff; }
+        .host-block { margin-bottom: 30px; }
+        .host-title { font-size: 1.2em; margin-bottom: 10px; }
+        .timeline { display: flex; flex-wrap: wrap; gap: 6px; }
+        .event {
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            background: #333;
+            border: 1px solid #555;
+        }
+        .phase-Plan { background: #2d3e50; }
+        .phase-Execute { background: #34495e; }
+        .phase-Health { background: #16a085; }
+        .status-Success, .status-OK { border-color: #2ecc71; }
+        .status-Failed, .status-FAIL, .status-Error { border-color: #e74c3c; }
+        .time { display: block; font-size: 0.75em; color: #aaa; }
+        .step { font-weight: bold; }
+        .detail { font-size: 0.75em; color: #ccc; margin-top: 2px; }
+    </style>
+</head>
+<body>
+    <h1>ForensicSuite Deployment Timeline</h1>
+    <div id="content">Loading log...</div>
+
+    <script>
+        async function loadLog() {
+            try {
+                const response = await fetch('../logs/orchestrator.log.json');
+                const text = await response.text();
+                const lines = text.trim().split('\n');
+                const events = lines.map(l => JSON.parse(l));
+
+                // Group by host
+                const byHost = {};
+                events.forEach(e => {
+                    const host = e.Host || '*';
+                    if (!byHost[host]) byHost[host] = [];
+                    byHost[host].push(e);
+                });
+
+                const container = document.getElementById('content');
+                container.innerHTML = '';
+
+                Object.keys(byHost).forEach(host => {
+                    const hostDiv = document.createElement('div');
+                    hostDiv.className = 'host-block';
+
+                    const title = document.createElement('div');
+                    title.className = 'host-title';
+                    title.textContent = `Host: ${host}`;
+                    hostDiv.appendChild(title);
+
+                    const timeline = document.createElement('div');
+                    timeline.className = 'timeline';
+
+                    const sorted = byHost[host].sort((a,b) => new Date(a.Time) - new Date(b.Time));
+
+                    sorted.forEach(e => {
+                        const ev = document.createElement('div');
+                        ev.className = `event phase-${e.Phase} status-${e.Status}`;
+
+                        ev.innerHTML = `
+                            <span class="time">${e.Time}</span>
+                            <span class="step">${e.Phase} → ${e.StepId}</span>
+                            <div class="detail">${e.Status}: ${e.Detail || ''}</div>
+                        `;
+                        timeline.appendChild(ev);
+                    });
+
+                    hostDiv.appendChild(timeline);
+                    container.appendChild(hostDiv);
+                });
+            } catch (err) {
+                document.getElementById('content').textContent = 'Failed to load log: ' + err;
+            }
+        }
+
+        loadLog();
+    </script>
+</body>
+</html>

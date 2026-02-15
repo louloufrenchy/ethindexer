@@ -1,0 +1,37 @@
+name: Orchestrator Dry Run
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  dryrun:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+        # (GitHub runners already have PowerShell; this step is optional if you want only PS)
+
+      - name: Run bootstrap (ensure structure)
+        shell: pwsh
+        run: |
+          ./bootstrap.ps1
+
+      - name: Install module locally (session)
+        shell: pwsh
+        run: |
+          Import-Module "$PWD\ForensicSuite.Orchestrator\ForensicSuite.Orchestrator.psd1"
+
+      - name: Dry run orchestrator
+        shell: pwsh
+        run: |
+          Set-Location "$PWD\tests"
+          ./dryrun.ps1

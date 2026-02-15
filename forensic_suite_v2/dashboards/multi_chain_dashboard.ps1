@@ -37,9 +37,9 @@ END;
         $f = $line.Split(",")
 
         $chain = $f[0]
-        $last  = [int]$f[1]
-        $head  = [int]$f[2]
-        $lag   = $head - $last
+        $last = [int]$f[1]
+        $head = [int]$f[2]
+        $lag = $head - $last
 
         if ($lag -lt 1000) { $color = "Green" }
         elseif ($lag -lt 10000) { $color = "Yellow" }

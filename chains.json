@@ -1,0 +1,19 @@
+{
+  "chains": {
+    "btc": {
+      "indexer_path": "btc_indexer",
+      "config": "btc_indexer/config/indexer.yaml",
+      "enabled": true
+    },
+    "eth": {
+      "indexer_path": "eth_indexer",
+      "config": "eth_indexer/config/indexer.yaml",
+      "enabled": true
+    },
+    "tron": {
+      "indexer_path": "tron_indexer",
+      "config": "tron_indexer/config/indexer.yaml",
+      "enabled": true
+    }
+  }
+}

@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# Virtual environments
+venv/
+env/
+
+# Installer artifacts
+*.whl
+dist/
+build/
+*.egg-info/
+
+# Logs
+*.log
+logs/
+*.tmp
+
+# Environment files
+.env
+.env.*
+
+# VS Code
+.vscode/
+.history/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PowerShell
+*.ps1xml
+*.psc1
+
+# SQL temp
+*.sql.tmp
+
+# Cache
+.cache/

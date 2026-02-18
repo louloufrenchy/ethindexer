@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "forensic_suite_v2"
+version = "0.1.0"
+description = "Unified multi-chain forensic suite (ETH, BTC, TRON)"
+authors = [
+    { name="Louis", email="your-email@example.com" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "click>=8.0.0",
+    "psycopg2-binary>=2.9.1",
+    "requests>=2.31.0",
+    "pydantic>=2.0.0",
+    "rich>=13.0.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]

@@ -84,3 +84,6 @@ Thumbs.db
 
 # Git noise
 .git/
+
+*.whl
+installer_payload/ForensicSuite/

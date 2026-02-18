@@ -1,0 +1,225 @@
+{
+  "id": null,
+  "uid": "forensic-cockpit-v2",
+  "title": "Forensic Suite v2 – Multi-Chain Cockpit",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "style": "dark",
+  "tags": ["forensic", "multi-chain", "btc", "eth", "tron"],
+  "panels": [
+    {
+      "type": "row",
+      "title": "Ingestion Health",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Indexer Lag per Chain",
+      "datasource": { "type": "postgres", "uid": "PG_TRON_INDEX" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": { "drawStyle": "line", "lineWidth": 2 }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "datasource": { "type": "postgres", "uid": "PG_TRON_INDEX" },
+          "rawSql": "SELECT ts AS \"time\", lag AS value, chain FROM indexer_metrics ORDER BY ts;",
+          "timeColumn": "time",
+          "metricColumn": "chain",
+          "valueColumn": "value"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Last Indexed Block vs Chain Head",
+      "datasource": { "type": "postgres", "uid": "PG_TRON_INDEX" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT ts AS \"time\", last_block AS value, chain || ' – last_block' AS metric FROM indexer_metrics ORDER BY ts;",
+          "timeColumn": "time",
+          "metricColumn": "metric",
+          "valueColumn": "value"
+        },
+        {
+          "refId": "B",
+          "format": "time_series",
+          "rawSql": "SELECT ts AS \"time\", chain_head AS value, chain || ' – chain_head' AS metric FROM indexer_metrics ORDER BY ts;",
+          "timeColumn": "time",
+          "metricColumn": "metric",
+          "valueColumn": "value"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Flow Activity (TRON / ETH)",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "TRON Flows per Minute",
+      "datasource": { "type": "postgres", "uid": "PG_TRON_INDEX" },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 10 },
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "options": {
+        "legend": { "displayMode": "hidden" },
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('minute', ts) AS \"time\", COUNT(*) AS value FROM v_tron_flows GROUP BY 1 ORDER BY 1;",
+          "timeColumn": "time",
+          "metricColumn": "none",
+          "valueColumn": "value"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "ETH Flows per Minute",
+      "datasource": { "type": "postgres", "uid": "PG_TRON_INDEX" },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 10 },
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "options": {
+        "legend": { "displayMode": "hidden" },
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('minute', ts) AS \"time\", COUNT(*) AS value FROM v_eth_flows GROUP BY 1 ORDER BY 1;",
+          "timeColumn": "time",
+          "metricColumn": "none",
+          "valueColumn": "value"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "heatmap",
+      "title": "Multi-Chain Flow Heatmap",
+      "datasource": { "type": "postgres", "uid": "PG_TRON_INDEX" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 17 },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "options": {
+        "legend": { "displayMode": "hidden" },
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT ts AS \"time\", chain AS metric, COUNT(*) AS value FROM v_all_flows GROUP BY 1, 2 ORDER BY 1;",
+          "timeColumn": "time",
+          "metricColumn": "metric",
+          "valueColumn": "value"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "BTC UTXO Dynamics",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "BTC UTXO Created vs Spent (per Minute)",
+      "datasource": { "type": "postgres", "uid": "PG_TRON_INDEX" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 26 },
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('minute', ts) AS \"time\", SUM(CASE WHEN spent = FALSE THEN 1 ELSE 0 END) AS created, SUM(CASE WHEN spent = TRUE THEN 1 ELSE 0 END) AS spent FROM v_btc_utxo_flows GROUP BY 1 ORDER BY 1;",
+          "timeColumn": "time",
+          "metricColumn": "none",
+          "valueColumn": "created"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Forensic Cockpit – Address Focus",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 34 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Address Activity Across Chains",
+      "datasource": { "type": "postgres", "uid": "PG_TRON_INDEX" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 35 },
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT ts AS \"time\", chain, COUNT(*) AS value FROM v_all_flows WHERE address = $__user{address} GROUP BY 1, 2 ORDER BY 1;",
+          "timeColumn": "time",
+          "metricColumn": "chain",
+          "valueColumn": "value"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "address",
+        "type": "textbox",
+        "label": "Address (TRON/ETH)",
+        "query": "",
+        "current": { "text": "", "value": "" }
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  }
+}

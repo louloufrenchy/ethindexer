@@ -1,0 +1,25 @@
+[flake8]
+# Allow longer lines (your indexers often contain long SQL, URLs, logs)
+max-line-length = 120
+
+# Ignore rules that are noisy or irrelevant for your suite
+ignore =
+    E302,  # expected 2 blank lines (too strict for service scripts)
+    E305,  # expected 2 blank lines after class/function
+    E501,  # line too long (we override with max-line-length)
+    F841,  # local variable assigned but never used (common in debug flows)
+
+# Exclude directories that should not be linted
+exclude =
+    venv,
+    .git,
+    __pycache__,
+    dashboards,
+    grafana,
+    scripts/windows_orchestrator_service.ps1
+
+# Show source code for each error
+show-source = true
+
+# Count total errors
+count = true

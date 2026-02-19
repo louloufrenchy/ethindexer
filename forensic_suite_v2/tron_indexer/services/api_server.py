@@ -2,10 +2,13 @@ import os
 import yaml
 import asyncpg
 import aiohttp
+from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-CONFIG_PATH = os.environ.get("CONFIG_PATH", r"C:\development\tron_indexer\config\indexer.yaml")
+BASE_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_CONFIG = BASE_DIR / "config" / "indexer.yaml"
+CONFIG_PATH = os.environ.get("CONFIG_PATH", str(DEFAULT_CONFIG))
 
 app = FastAPI()
 db_pool = None

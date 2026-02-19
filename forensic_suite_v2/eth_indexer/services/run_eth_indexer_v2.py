@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 from typing import Any, Dict
 
-from forensic_suite_v2.tron_indexer.services.tron_indexer_service import TronIndexerService
+from forensic_suite_v2.eth_indexer.services.eth_indexer_service import EthIndexerService
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -17,9 +17,9 @@ def load_config() -> Dict[str, Any]:
 
 async def main() -> None:
     cfg = load_config()
-    indexer = TronIndexerService(cfg)
+    indexer = EthIndexerService(cfg)
     await indexer.run()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main()

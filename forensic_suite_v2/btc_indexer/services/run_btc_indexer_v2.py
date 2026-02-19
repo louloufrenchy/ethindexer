@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 from typing import Any, Dict
 
-from forensic_suite_v2.tron_indexer.services.tron_indexer_service import TronIndexerService
+from forensic_suite_v2.btc_indexer.services.btc_indexer_service import BtcIndexerService
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -17,7 +17,7 @@ def load_config() -> Dict[str, Any]:
 
 async def main() -> None:
     cfg = load_config()
-    indexer = TronIndexerService(cfg)
+    indexer = BtcIndexerService(cfg)
     await indexer.run()
 
 

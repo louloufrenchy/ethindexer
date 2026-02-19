@@ -1,4 +1,5 @@
 $env:PGPASSWORD = "Str0ngPassw0rd2025"
+from forensic_suite_v2.dashboards.exporter import export_dashboards
 
 while ($true) {
     Clear-Host

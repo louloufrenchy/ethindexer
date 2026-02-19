@@ -1,6 +1,7 @@
 import sys
 import subprocess
 from pathlib import Path
+from forensic_suite_v2.cli.__main__ import cli
 
 import click
 

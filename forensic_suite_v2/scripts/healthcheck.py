@@ -1,6 +1,8 @@
 import json
 import subprocess
 from pathlib import Path
+from forensic_suite_v2.scripts.healthcheck import run_healthcheck
+from forensic_suite_v2.scripts.operator_console import OperatorConsole
 
 def load_manifest():
     with open("chains.json") as f:

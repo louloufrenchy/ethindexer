@@ -1,3 +1,7 @@
+from forensic_suite_v2.plugins.eth.plugin import EthPlugin
+from forensic_suite_v2.plugins.tron.plugin import TronPlugin
+from forensic_suite_v2.plugins.btc.plugin import BtcPlugin
+
 class ETHPlugin:
     name = "eth"
     description = "Ethereum tracer plugin"

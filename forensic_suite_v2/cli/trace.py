@@ -1,10 +1,11 @@
 # forensic_suite_v2/cli/trace.py
 import argparse, asyncio, os
 from datetime import datetime
+from dotenv import load_dotenv
 from forensic_suite_v2.tracer_engine.manifest_v2 import TraceSeed, TraceManifestV2
 from forensic_suite_v2.tracer_engine.multi_chain_tracer_v2 import run_multi_chain_trace_v2
 from forensic_suite_v2.tracer_engine.multi_chain_recursive_v2 import run_traces_v2_multi_chain
-from dotenv import load_dotenv
+from forensic_suite_v2.cli.__main__ import cli
 
 load_dotenv()
 

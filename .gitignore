@@ -52,25 +52,62 @@ build/
 *.egg-info/
 __pycache__/
 *.pyc
+.eggs/
+pip-wheel-metadata/
+
+# PyInstaller
+*.spec
+*.manifest
+*.dll
+*.pyd
+*.pkg
+*.toc
+*.tmp
+*.bak
+*.log
 
 # Installer build output
 Output/
 installer_payload/build/
+installer_payload/output/
+installer_payload/ForensicSuite/
 *.exe
 *.msi
-*.iss.tmp
+*.whl
+*.zip
+*.7z
 
 # Temporary build folders
 build_tmp/
 temp/
 tmp/
-*.log
-*.bak
 
 # Virtual environments
 venv/
+.venv/
 .env/
 .env*/
+*.env
+env.json
+secrets.json
+
+# Indexer runtime state
+forensic_suite_v2/*_indexer/*_checkpoint.json
+forensic_suite_v2/*_indexer/checkpoints/
+*.checkpoint
+*.state
+
+# Logs
+logs/
+*.log
+operator_console.log
+healthcheck.log
+deployment.log
+
+# Backups
+backup_forensic_suite_v2_*/
+backup_*/
+*.bak
 
 # IDE/editor noise
 .vscode/
@@ -80,6 +117,7 @@ venv/
 
 # OS noise
 Thumbs.db
+Desktop.ini
 .DS_Store
 
 # Git noise
@@ -87,3 +125,11 @@ Thumbs.db
 
 *.whl
 installer_payload/ForensicSuite/
+# Grafana exports
+*.json.tmp
+grafana_export/
+
+# Misc
+*.tmp
+tmp/
+temp/

@@ -1,7 +1,18 @@
+import json
 import os
 import typing
 from forensic_suite_v2.tools.env_loader import load_env
 from forensic_suite_v2.tools.validators import validate_environment
+from pathlib import Path
+from typing import Dict, Tuple
+
+from forensic_suite_v2.tools.env_loader import load_env
+from forensic_suite_v2.tools.validators import validate_environment
+
+env = load_env("env.json")
+for key, value in env.items():
+    os.environ[key] = value
+
 
 def validate_env_and_endpoints() -> Dict[str, Tuple[bool, str]]:
     """

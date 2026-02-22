@@ -194,4 +194,6 @@ class BaseIndexerService(ABC):
         if self.reorg_depth > self.config.reorg_depth:
             self.reorg_depth -= 0.1
 
+        await asyncio.sleep(0.05)
+
         return height

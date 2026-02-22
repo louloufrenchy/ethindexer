@@ -3,6 +3,9 @@ import asyncpg
 import os
 import time
 from datetime import datetime, timezone
+from forensic_suite_v2.btc_indexer.services.run_btc_indexer_v2 import main as run_btc
+from forensic_suite_v2.eth_indexer.services.run_eth_indexer_v2 import main as run_eth
+from forensic_suite_v2.tron_indexer.services.run_tron_indexer_v2 import main as run_tron
 
 CONFIG_PATH = os.environ.get("CONFIG_PATH", "C:/forensic_suite_v2/btc_indexer/config/indexer.yaml")
 

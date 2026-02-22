@@ -24,20 +24,22 @@ from forensic_suite_v2.plugins.btc.plugin import BTCPlugin
 from forensic_suite_v2.plugins.eth.plugin import ETHPlugin
 from forensic_suite_v2.plugins.tron.plugin import TRONPlugin
 from forensic_suite_v2.plugins.custom.plugin import CustomPlugin
+import importlib
+import pkgutil
+from pathlib import Path
+import forensic_suite_v2
 
+def discover_plugins():
+    plugin_dir = Path(forensic_suite_v2.__file__).parent / "plugins"
+    plugins = {}
 
-def load_plugins(engine):
-    """
-    Load all chain plugins into the engine.
-    """
-    plugins = [
-        BTCPlugin(),
-        ETHPlugin(),
-        TRONPlugin(),
-        CustomPlugin(),
-    ]
+    for module in pkgutil.iter_modules([str(plugin_dir)]):
+        name = module.name
+        full_path = f"forensic_suite_v2.plugins.{name}.plugin"
+        try:
+            mod = importlib.import_module(full_path)
+            plugins[name] = mod.Plugin()
+        except Exception as e:
+            print(f"[WARN] Failed to load plugin {name}: {e}")
 
-    for plugin in plugins:
-        engine.register_plugin(plugin)
-
-    return engine.plugins
+    return plugins

@@ -1,0 +1,130 @@
+{
+  "folders": [
+    {
+      "name": "Deployment Root",
+      "path": "C:/development/forensic_tracer_installer_project_root"
+    },
+    {
+      "name": "Forensic Suite Source",
+      "path": "C:/forensic_suite_v2"
+    },
+    {
+      "name": "BTC Indexer",
+      "path": "C:/forensic_suite_v2/btc_indexer"
+    },
+    {
+      "name": "ETH Indexer",
+      "path": "C:/forensic_suite_v2/eth_indexer"
+    },
+    {
+      "name": "TRON Indexer",
+      "path": "C:/forensic_suite_v2/tron_indexer"
+    },
+    {
+      "name": "Core Engine",
+      "path": "C:/forensic_suite_v2/core"
+    },
+    {
+      "name": "Plugins",
+      "path": "C:/forensic_suite_v2/plugins"
+    },
+    {
+      "name": "Dashboards",
+      "path": "C:/forensic_suite_v2/dashboards"
+    },
+    {
+      "name": "Installer Payload",
+      "path": "C:/development/forensic_tracer_installer_project_root/installer_payload"
+    },
+    {
+      "name": "Orchestrator Scripts",
+      "path": "C:/development/forensic_tracer_installer_project_root/scripts/orchestrator"
+    }
+  ],
+  "settings": {
+    "workbench.colorTheme": "Default High Contrast",
+    "workbench.commandPalette.experimental.suggestCommands": true,
+    "workbench.settings.applyToAllProfiles": [
+      "workbench.commandPalette.experimental.enableNaturalLanguageSearch"
+    ],
+    "security.workspace.trust.untrustedFiles": "open",
+    "files.encoding": "utf8",
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "files.eol": "\n",
+    "editor.formatOnSave": true,
+    "editor.detectIndentation": false,
+    "editor.renderWhitespace": "boundary",
+    "editor.renderFinalNewline": true,
+    "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe",
+    "python.formatting.provider": "black",
+    "python.analysis.typeCheckingMode": "basic",
+    "[python]": {
+      "editor.tabSize": 4,
+      "editor.insertSpaces": true,
+      "files.eol": "\n"
+    },
+    "powershell.integratedConsole.showOnStartup": false,
+    "powershell.codeFormatting.preset": "OTBS",
+    "powershell.scriptAnalysis.enable": true,
+    "[powershell]": {
+      "editor.tabSize": 4,
+      "editor.insertSpaces": true,
+      "files.eol": "\r\n",
+      "files.encoding": "utf8bom"
+    },
+    "[powershellscript]": {
+      "editor.tabSize": 4,
+      "editor.insertSpaces": true,
+      "files.eol": "\r\n",
+      "files.encoding": "utf8bom"
+    },
+    "[json]": {
+      "editor.tabSize": 2,
+      "editor.insertSpaces": true,
+      "files.eol": "\n"
+    },
+    "[jsonc]": {
+      "editor.tabSize": 2,
+      "editor.insertSpaces": true,
+      "files.eol": "\n"
+    },
+    "[yaml]": {
+      "editor.tabSize": 2,
+      "editor.insertSpaces": true,
+      "files.eol": "\n"
+    },
+    "[toml]": {
+      "editor.tabSize": 2,
+      "editor.insertSpaces": true,
+      "files.eol": "\n"
+    },
+    "[sql]": {
+      "editor.tabSize": 4,
+      "editor.insertSpaces": true,
+      "files.eol": "\n"
+    },
+    "[shellscript]": {
+      "editor.tabSize": 2,
+      "editor.insertSpaces": true,
+      "files.eol": "\n"
+    },
+    "[markdown]": {
+      "editor.tabSize": 2,
+      "editor.insertSpaces": true,
+      "files.eol": "\n",
+      "files.trimTrailingWhitespace": false
+    },
+    "[makefile]": {
+      "editor.insertSpaces": false
+    },
+    "files.watcherExclude": {
+      "**/dist/**": true,
+      "**/build/**": true,
+      "**/__pycache__/**": true,
+      "**/installer_payload/ForensicSuite/**": true,
+      "**/backup_forensic_suite_v2_*/**": true
+    },
+    "json.schemas": []
+  }
+}

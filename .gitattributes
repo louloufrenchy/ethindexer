@@ -1,4 +1,78 @@
-*.ps1  text working-tree-encoding=UTF-8
-*.psm1 text working-tree-encoding=UTF-8
-*.psd1 text working-tree-encoding=UTF-8
-*.json text working-tree-encoding=UTF-8
+# ------------------------------------------------------------------------------
+# Core normalization
+# ------------------------------------------------------------------------------
+
+# Default to LF for all text files
+* text=auto eol=lf
+
+# ------------------------------------------------------------------------------
+# Python source (always LF)
+# ------------------------------------------------------------------------------
+*.py      text eol=lf
+*.pyw     text eol=lf
+*.pyi     text eol=lf
+
+# ------------------------------------------------------------------------------
+# Configuration, manifests, metadata (LF)
+# ------------------------------------------------------------------------------
+*.json    text eol=lf
+*.yaml    text eol=lf
+*.yml     text eol=lf
+*.toml    text eol=lf
+*.cfg     text eol=lf
+*.ini     text eol=lf
+*.env     text eol=lf
+*.md      text eol=lf
+*.sql     text eol=lf
+*.psql    text eol=lf
+*.csv     text eol=lf
+
+# ------------------------------------------------------------------------------
+# PowerShell scripts (Windows-native → CRLF)
+# ------------------------------------------------------------------------------
+*.ps1     text eol=crlf
+*.psm1    text eol=crlf
+*.psd1    text eol=crlf
+
+# ------------------------------------------------------------------------------
+# Batch files (Windows-native → CRLF)
+# ------------------------------------------------------------------------------
+*.bat     text eol=crlf
+*.cmd     text eol=crlf
+
+# ------------------------------------------------------------------------------
+# Shell scripts (Linux-native → LF)
+# ------------------------------------------------------------------------------
+*.sh      text eol=lf
+
+# ------------------------------------------------------------------------------
+# Grafana dashboards (LF)
+# ------------------------------------------------------------------------------
+installer_payload/dashboards/*.json text eol=lf
+forensic_suite_v2/dashboards/*.json text eol=lf
+
+# ------------------------------------------------------------------------------
+# PyInstaller spec files (LF)
+# ------------------------------------------------------------------------------
+*.spec    text eol=lf
+
+# ------------------------------------------------------------------------------
+# Binary files (no normalization)
+# ------------------------------------------------------------------------------
+*.exe     binary
+*.dll     binary
+*.pyd     binary
+*.whl     binary
+*.zip     binary
+*.7z      binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+
+# ------------------------------------------------------------------------------
+# Logs and artifacts (no normalization)
+# ------------------------------------------------------------------------------
+*.log     text eol=lf
+*.bak     text eol=lf

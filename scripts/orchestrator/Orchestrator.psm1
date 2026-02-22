@@ -1,6 +1,7 @@
 # Orchestrator.psm1 — Stable Minimal Version
 # Requires -Version 7.0
 using namespace System.Management.Automation.Runspaces
+. $PSScriptRoot\Invoke-ForensicDeployment.ps1
 
 # ------------------------------------------------------------
 # Manifest loading

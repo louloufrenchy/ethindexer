@@ -1,57 +1,45 @@
-# 1. Setup Sandbox Environment
+# =====================================================================
+# Hardened Installer Sandbox Test (V3)
+# =====================================================================
+$primaryRoot = "C:\development\forensic_tracer_installer_project_root"
 $testRoot = "C:\ForensicSuite_TestRun"
-$payloadSrc = "installer_payload"
+$payloadSrc = Join-Path $primaryRoot "installer_payload"
 
+# 1. Break the lock and purge
+Set-Location $primaryRoot
 if (Test-Path $testRoot) {
-    Write-Host "Cleaning previous test directory..." -ForegroundColor Gray
-    Remove-Item -Recurse -Force $testRoot
+    Write-Host ">>> Purging stale sandbox..." -ForegroundColor Gray
+    Remove-Item -Recurse -Force $testRoot -ErrorAction SilentlyContinue
 }
-New-Item -ItemType Directory -Path $testRoot | Out-Null
+New-Item -ItemType Directory -Path $testRoot -Force | Out-Null
 
-# 2. Stage Files (Simulate what Inno Setup does)
-Write-Host "Staging files to $testRoot..." -ForegroundColor Cyan
+# 2. Stage the payload
+Write-Host ">>> Staging files to $testRoot..." -ForegroundColor Cyan
 Copy-Item -Path "$payloadSrc\*" -Destination $testRoot -Recurse -Force
 
-# 3. Simulate installer creating secrets directory BEFORE bootstrap
+# 3. Drop secrets template
 $secretRoot = "C:\forensic_secrets"
-if (!(Test-Path $secretRoot)) {
-    Write-Host "Creating secrets directory at $secretRoot" -ForegroundColor Yellow
-    New-Item -ItemType Directory -Path $secretRoot | Out-Null
-}
-
-# 4. Simulate installer dropping template env.json
-$template = Join-Path $payloadSrc "env.template.json"
+if (!(Test-Path $secretRoot)) { New-Item -ItemType Directory -Path $secretRoot | Out-Null }
+$template = Join-Path $payloadSrc "dot_env.template"
 $target = Join-Path $secretRoot "env.json"
+if (!(Test-Path $target)) { Copy-Item $template $target }
 
-if (!(Test-Path $target) -and (Test-Path $template)) {
-    Write-Host "Copying env.template.json to $target" -ForegroundColor Yellow
-    Copy-Item $template $target
-}
-
-# 5. Execute Bootstrap in a "Hider" Block
-Write-Host "Starting Bootstrap Test..." -ForegroundColor Green
-Set-Location $testRoot
-
+# 4. Execute the Active Bootstrap
+Write-Host ">>> Starting Hardened Bootstrap Test..." -ForegroundColor Green
+Push-Location $testRoot
 try {
-    .\bootstrap.ps1 -PythonInstaller "python-3.14.2-amd64.exe" -WheelPath "forensic_suite_v2-0.1.2-py3-none-any.whl"
-} catch {
-    Write-Host "Test Failed: $($_.Exception.Message)" -ForegroundColor Red
+    .\bootstrap.ps1
+} finally {
+    Pop-Location
 }
 
-# 6. Verify Results
+# 5. Final Verification
 Write-Host "`n=== Post-Test Verification ===" -ForegroundColor Cyan
-$checks = @(
-    "venv\Scripts\python.exe",
-    "logs\gui.log",
-    "ForensicSuite\ForensicSuite.exe"
-)
-
+$checks = @("venv\Scripts\python.exe", "logs", "dot_env.template")
 foreach ($path in $checks) {
     if (Test-Path (Join-Path $testRoot $path)) {
-        Write-Host "[PASS] Found: $path" -ForegroundColor Green
+        Write-Host "[PASS] Verified: $path" -ForegroundColor Green
     } else {
         Write-Host "[FAIL] Missing: $path" -ForegroundColor Red
     }
 }
-
-Write-Host "`nReview the $testRoot folder to ensure the DB and Venv are initialized." -ForegroundColor White

@@ -1,5 +1,5 @@
 postgres:
-  dsn: "postgres://postgres:Str0ngPassw0rd2025@127.0.0.1:5432/forensic"
+  dsn: "postgres://postgres:${PGPASSWORD}@127.0.0.1:5432/forensic"
   min_pool: 1
   max_pool: 10
   timeout: 60

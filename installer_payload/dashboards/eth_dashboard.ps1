@@ -1,5 +1,14 @@
-$env:PGPASSWORD = "Str0ngPassw0rd2025"
-from forensic_suite_v2.dashboards.exporter import export_dashboards
+# ============================
+# Load external secrets
+# ============================
+$secretPath = "C:\forensic_secrets\env.json"
+if (Test-Path $secretPath) {
+    $envData = Get-Content $secretPath | ConvertFrom-Json
+    $env:PGPASSWORD = $envData.PGPASSWORD
+} else {
+    Write-Host "Missing secrets file: $secretPath" -ForegroundColor Red
+    exit 1
+}
 
 while ($true) {
     Clear-Host
@@ -7,7 +16,7 @@ while ($true) {
     # ============================
     # CONFIG
     # ============================
-    $target = 22000000  # set to your current ETH head or goal
+    $target = 22000000
 
     $result = psql -h 127.0.0.1 -p 5432 -U postgres -d forensic -t -A -F"," -c @"
 WITH
@@ -44,11 +53,11 @@ FROM checkpoint, blocks, metrics;
 
     $fields = $result.Split(",")
 
-    $lastIndexed   = [int]$fields[0]
-    $lastBlockRow  = [int]$fields[1]
-    $headBlock     = [int]$fields[2]
+    $lastIndexed = [int]$fields[0]
+    $lastBlockRow = [int]$fields[1]
+    $headBlock = [int]$fields[2]
 
-    $lag       = $headBlock - $lastIndexed
+    $lag = $headBlock - $lastIndexed
     $remaining = $target - $lastIndexed
 
     if ($remaining -gt 0) {

@@ -11,8 +11,16 @@ ArchitecturesInstallIn64BitMode=x64
 Compression=lzma
 SolidCompression=yes
 
+[Dirs]
+Name: "C:\forensic_secrets"; Flags: uninsneveruninstall
+
 [Files]
+; Main application payload
 Source: "installer_payload\*"; DestDir: "{app}"; Flags: recursesubdirs
+
+; Template secrets (never real secrets)
+Source: "env.template.json"; DestDir: "C:\forensic_secrets"; Flags: onlyifdoesntexist
+Source: "dot_env.template"; DestDir: "C:\forensic_secrets"; DestName: ".env"; Flags: onlyifdoesntexist
 
 [Run]
 Filename: "powershell.exe"; \

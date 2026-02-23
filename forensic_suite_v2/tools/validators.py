@@ -8,7 +8,6 @@ def validate_environment():
 
     required_files = [
         "chains.json",
-        "env.json",
     ]
 
     missing = [f for f in required_files if not Path(f).exists()]

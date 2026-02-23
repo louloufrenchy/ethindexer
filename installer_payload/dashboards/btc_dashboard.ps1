@@ -1,4 +1,14 @@
-$env:PGPASSWORD = "Str0ngPassw0rd2025"
+# ============================
+# Load external secrets
+# ============================
+$secretPath = "C:\forensic_secrets\env.json"
+if (Test-Path $secretPath) {
+    $envData = Get-Content $secretPath | ConvertFrom-Json
+    $env:PGPASSWORD = $envData.PGPASSWORD
+} else {
+    Write-Host "Missing secrets file: $secretPath" -ForegroundColor Red
+    exit 1
+}
 
 while ($true) {
     Clear-Host
@@ -6,7 +16,6 @@ while ($true) {
     # ============================
     # CONFIG
     # ============================
-    # Set your BTC target height here (e.g., current chain head)
     $target = 935000
 
     # Query unified forensic DB
@@ -48,11 +57,11 @@ FROM checkpoint, blocks, metrics;
     # ============================
     $fields = $result.Split(",")
 
-    $lastIndexed   = [int]$fields[0]  # from btc_index_checkpoint
-    $lastBlockRow  = [int]$fields[1]  # max(btc_blocks.height)
-    $headBlock     = [int]$fields[2]  # from ingestion_metrics
+    $lastIndexed = [int]$fields[0]
+    $lastBlockRow = [int]$fields[1]
+    $headBlock = [int]$fields[2]
 
-    $lag       = $headBlock - $lastIndexed
+    $lag = $headBlock - $lastIndexed
     $remaining = $target - $lastIndexed
 
     # ============================

@@ -1,9 +1,4 @@
-import json
-from pathlib import Path
+from forensic_suite_v2.tools.secret_loader import load_env
 
-def load_env(path="env.json"):
-    p = Path(path)
-    if not p.exists():
-        raise FileNotFoundError(f"Missing environment file: {path}")
-    with open(p, "r") as f:
-        return json.load(f)
+def load_env_file(path=None):
+    return load_env()

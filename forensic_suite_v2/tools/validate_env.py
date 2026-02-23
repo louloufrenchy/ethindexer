@@ -1,24 +1,14 @@
-import json
 import os
-import typing
-from forensic_suite_v2.tools.env_loader import load_env
-from forensic_suite_v2.tools.validators import validate_environment
-from pathlib import Path
 from typing import Dict, Tuple
+from forensic_suite_v2.tools.secret_loader import load_env
 
-from forensic_suite_v2.tools.env_loader import load_env
-from forensic_suite_v2.tools.validators import validate_environment
-
-env = load_env("env.json")
-for key, value in env.items():
-    os.environ[key] = value
-
+def load_and_export_env():
+    env = load_env()
+    for key, value in env.items():
+        os.environ[key] = value
 
 def validate_env_and_endpoints() -> Dict[str, Tuple[bool, str]]:
-    """
-    Validates presence and basic format of required .env keys.
-    Returns a dict of key → (is_valid, error_message_if_any)
-    """
+    load_and_export_env()
 
     required_keys = {
         "QUICKNODE_ETH_HTTP": "ETH QuickNode HTTP endpoint",
@@ -43,7 +33,6 @@ def validate_env_and_endpoints() -> Dict[str, Tuple[bool, str]]:
         results[key] = (True, "")
 
     return results
-
 
 if __name__ == "__main__":
     from pprint import pprint

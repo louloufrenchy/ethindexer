@@ -1,5 +1,14 @@
-$env:PGPASSWORD = "Str0ngPassw0rd2025"
-from forensic_suite_v2.dashboards.exporter import export_dashboards
+# ============================
+# Load external secrets
+# ============================
+$secretPath = "C:\forensic_secrets\env.json"
+if (Test-Path $secretPath) {
+    $envData = Get-Content $secretPath | ConvertFrom-Json
+    $env:PGPASSWORD = $envData.PGPASSWORD
+} else {
+    Write-Host "Missing secrets file: $secretPath" -ForegroundColor Red
+    exit 1
+}
 
 while ($true) {
     Clear-Host
@@ -37,9 +46,9 @@ END;
         $f = $line.Split(",")
 
         $chain = $f[0]
-        $last  = [int]$f[1]
-        $head  = [int]$f[2]
-        $lag   = $head - $last
+        $last = [int]$f[1]
+        $head = [int]$f[2]
+        $lag = $head - $last
 
         if ($lag -lt 1000) { $color = "Green" }
         elseif ($lag -lt 10000) { $color = "Yellow" }

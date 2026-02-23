@@ -3,29 +3,10 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "forensic_suite_v2"
-version = "0.1.0"
-description = "Unified multi-chain forensic suite (ETH, BTC, TRON)"
-authors = [
-    { name="Louis", email="your-email@example.com" }
-]
-readme = "README.md"
-requires-python = ">=3.10"
-
-dependencies = [
-    "click>=8.0.0",
-    "psycopg2-binary>=2.9.1",
-    "requests>=2.31.0",
-    "pydantic>=2.0.0",
-    "rich>=13.0.0"
-]
-
-[tool.setuptools.packages.find]
-where = ["forensic_suite_v2"]
-[project]
 name = "forensic-suite-v2"
 version = "0.1.2"
 description = "Forensic Suite v2 – Multi-chain blockchain analysis toolkit"
+readme = "README.md"
 requires-python = ">=3.10"
 
 authors = [
@@ -35,9 +16,17 @@ authors = [
 dependencies = [
     "click>=8.0",
     "psycopg2-binary>=2.9",
+    "asyncpg>=0.28",
     "fastapi>=0.110",
     "uvicorn>=0.29",
     "pyside6>=6.6",
+    "requests>=2.31.0",
+    "pydantic>=2.0.0",
+    "rich>=13.0.0",
+    "orjson>=3.9.0",
+    "prometheus_client>=0.20.0",
+    "PyYAML>=6.0",
+    "python-dotenv>=1.0.0"
 ]
 
 [project.scripts]

@@ -12,7 +12,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt
 
 from forensic_suite_v2.core.engine import Engine
-from forensic_suite_v2.core.plugin_loader import load_plugins
+from forensic_suite_v2.core.plugin_loader import discover_plugins
 
 
 # ------------------------------------------------------------
@@ -120,7 +120,6 @@ class MainWindow(QMainWindow):
             self.setWindowIcon(QIcon(str(icon_path)))
 
         self.engine = Engine()
-        load_plugins(self.engine)
 
         self._build_menu()
         self._build_central()

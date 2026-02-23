@@ -1,7 +1,7 @@
 import argparse
 import subprocess
 from pathlib import Path
-from core.logging import get_logger
+from forensic_suite_v2.core.logging import get_logger
 from forensic_suite_v2.scripts.healthcheck import run_healthcheck
 from forensic_suite_v2.scripts.operator_console import OperatorConsole
 

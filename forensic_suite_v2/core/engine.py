@@ -1,7 +1,5 @@
-from forensic_suite_v2.core.engine import Engine
 from forensic_suite_v2.core.plugin_loader import discover_plugins
 from forensic_suite_v2.core.logging import get_logger
-# Correct pattern
 from forensic_suite_v2.core.indexer_engine import BaseIndexerService
 
 class Engine:

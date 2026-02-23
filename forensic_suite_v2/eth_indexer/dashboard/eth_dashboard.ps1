@@ -1,4 +1,4 @@
-<# 
+<#
     eth_dashboard.ps1
     - Simple ETH progress dashboard
     - Mirrors tron_dashboard.ps1 / btc_dashboard.ps1 style
@@ -6,9 +6,9 @@
 #>
 
 param(
-    [string]$PgHost = "WIN-8ENVN7I0JFE",
-    [int]$PgPort    = 5432,
-    [string]$PgDb   = "forensic",
+    [string]$PgHost = "localhost",
+    [int]$PgPort = 5432,
+    [string]$PgDb = "forensic",
     [string]$PgUser = "postgres",
     [int]$RefreshSeconds = 5
 )

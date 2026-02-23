@@ -1,7 +1,3 @@
-from forensic_suite_v2.plugins.eth.plugin import EthPlugin
-from forensic_suite_v2.plugins.tron.plugin import TronPlugin
-from forensic_suite_v2.plugins.btc.plugin import BtcPlugin
-
 class CustomPlugin:
     name = "custom"
     description = "Custom tracer plugin"

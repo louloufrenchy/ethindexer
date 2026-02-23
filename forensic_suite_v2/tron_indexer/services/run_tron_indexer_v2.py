@@ -9,10 +9,10 @@ from types import SimpleNamespace
 from forensic_suite_v2.tron_indexer.services.tron_indexer_service import TronIndexerService
 from forensic_suite_v2.core.schema_validator import validate_schema
 
-import debugpy
-debugpy.listen(("0.0.0.0", 5678))
-print("Waiting for debugger attach on port 5678...")
-debugpy.wait_for_client()
+# import debugpy
+# debugpy.listen(("0.0.0.0", 5678))
+# print("Waiting for debugger attach on port 5678...")
+# debugpy.wait_for_client()
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG = BASE_DIR / "config" / "indexer.yaml"

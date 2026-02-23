@@ -15,10 +15,10 @@ from types import SimpleNamespace
 from forensic_suite_v2.eth_indexer.services.eth_indexer_service import EthIndexerService
 from forensic_suite_v2.core.schema_validator import validate_schema
 
-import debugpy
-debugpy.listen(("0.0.0.0", 5678))
-print("Waiting for debugger attach on port 5678...")
-debugpy.wait_for_client()
+# import debugpy
+# debugpy.listen(("0.0.0.0", 5678))
+# print("Waiting for debugger attach on port 5678...")
+# debugpy.wait_for_client()
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG = BASE_DIR / "config" / "indexer.yaml"
@@ -40,7 +40,7 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main()
+    asyncio.run(main())
 async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")

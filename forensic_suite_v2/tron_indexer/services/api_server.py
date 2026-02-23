@@ -16,10 +16,10 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = BASE_DIR / "config" / "indexer.yaml"
 CONFIG_PATH = os.environ.get("CONFIG_PATH", str(DEFAULT_CONFIG))
 
-import debugpy
-debugpy.listen(("0.0.0.0", 5678))
-print("Waiting for debugger attach on port 5678...")
-debugpy.wait_for_client()
+# import debugpy
+# debugpy.listen(("0.0.0.0", 5678))
+# print("Waiting for debugger attach on port 5678...")
+# debugpy.wait_for_client()
 
 app = FastAPI()
 db_pool = None

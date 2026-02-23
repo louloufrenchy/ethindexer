@@ -10,7 +10,7 @@ import yaml
 # ------------------------------------------------------------
 # Resolve CONFIG_PATH deterministically
 # ------------------------------------------------------------
-# BASE_DIR = forensic_suite_v2/btc_indexer
+# BASE_DIR = forensic_suite_v2/eth_indexer
 BASE_DIR = Path(__file__).resolve().parents[1]
 
 DEFAULT_CONFIG = BASE_DIR / "config" / "indexer.yaml"
@@ -41,17 +41,17 @@ async def fetch_metrics(conn):
     return await conn.fetchrow("""
         SELECT ts, last_block, chain_head, lag
         FROM indexer_metrics
-        WHERE chain = 'btc'
+        WHERE chain = 'eth'
         ORDER BY ts DESC
         LIMIT 1
     """)
 
 
 async def fetch_block_counts(conn):
-    row = await conn.fetchrow("SELECT COUNT(*) AS c FROM btc_blocks")
-    tx = await conn.fetchrow("SELECT COUNT(*) AS c FROM btc_transactions")
-    utxo = await conn.fetchrow("SELECT COUNT(*) AS c FROM btc_utxos")
-    return row["c"], tx["c"], utxo["c"]
+    row = await conn.fetchrow("SELECT COUNT(*) AS c FROM eth_blocks")
+    tx = await conn.fetchrow("SELECT COUNT(*) AS c FROM eth_transactions")
+    logs = await conn.fetchrow("SELECT COUNT(*) AS c FROM eth_logs")
+    return row["c"], tx["c"], logs["c"]
 
 
 def clear():
@@ -78,15 +78,15 @@ async def main():
     conn = await asyncpg.connect(PG_DSN)
     await conn.execute("SET search_path TO public")
 
-    print("[BTC DASHBOARD] Connected to Postgres")
+    print("[ETH DASHBOARD] Connected to Postgres")
     time.sleep(1)
 
     while True:
         metrics = await fetch_metrics(conn)
-        blocks, txs, utxos = await fetch_block_counts(conn)
+        blocks, txs, logs = await fetch_block_counts(conn)
 
         clear()
-        print("=== BTC Ingestion Dashboard (updates every 2s) ===")
+        print("=== ETH Ingestion Dashboard (updates every 2s) ===")
         print(f"Config: {CONFIG_PATH}")
         print(f"Time:   {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}")
         print("")
@@ -103,13 +103,13 @@ async def main():
             print("Progress:")
             print(progress_bar(last_block, head))
         else:
-            print("No BTC metrics yet. Waiting for indexer…")
+            print("No ETH metrics yet. Waiting for indexer…")
 
         print("")
         print("=== Table Counts ===")
-        print(f"btc_blocks:       {blocks:,}")
-        print(f"btc_transactions: {txs:,}")
-        print(f"btc_utxos:        {utxos:,}")
+        print(f"eth_blocks:       {blocks:,}")
+        print(f"eth_transactions: {txs:,}")
+        print(f"eth_logs:         {logs:,}")
 
         print("\n(CTRL+C to exit)")
         await asyncio.sleep(REFRESH)
@@ -119,4 +119,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n[BTC DASHBOARD] Exiting…")
+        print("\n[ETH DASHBOARD] Exiting…")

@@ -2,8 +2,7 @@ import cmd
 import subprocess
 import json
 from pathlib import Path
-from forensic_suite_v2.scripts.healthcheck import run_healthcheck
-from forensic_suite_v2.scripts.operator_console import OperatorConsole
+from forensic_suite_v2.scripts.healthcheck_core import run_healthcheck
 
 MANIFEST_PATH = Path("chains.json")
 

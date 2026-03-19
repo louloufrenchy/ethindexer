@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "secrets_root": "C:\\forensic_secrets",
+  "env_file": ".env",
+  "required_keys": [
+    "PGPASSWORD",
+    "QUICKNODE_ETH_HTTP",
+    "QUICKNODE_ETH_WSS",
+    "QUICKNODE_ETH_ENDPOINT_1",
+    "QUICKNODE_TRON_ENDPOINT_1",
+    "QUICKNODE_BTC_ENDPOINT_1"
+  ],
+  "optional_keys": [
+    "QUICKNODE_ETH_ENDPOINT_2",
+    "QUICKNODE_TRON_ENDPOINT_2",
+    "QUICKNODE_BTC_ENDPOINT_2"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "version": "v2.0",
+  "description": "Forensic Suite V2 Blue/Green Cluster Deployment",
+  "hosts": [
+    "192.168.0.172",
+    "192.168.0.199",
+    "192.168.0.165",
+    "192.168.0.28"
+  ],
+  "paths": {
+    "payload_root": "C:\\installer_payload",
+    "blue_root": "C:\\forensic_suite_v2_blue",
+    "green_root": "C:\\forensic_suite_v2_green",
+    "link_root": "C:\\forensic_suite_v2"
+  },
+  "python": "C:\\Program Files\\Python314\\python.exe",
+  "services": [
+    "btc_indexer",
+    "eth_indexer",
+    "tron_indexer"
+  ]
+}

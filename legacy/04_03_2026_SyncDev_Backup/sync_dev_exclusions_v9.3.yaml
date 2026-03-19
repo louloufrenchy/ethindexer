@@ -1,0 +1,95 @@
+# =====================================================================
+# sync_dev_exclusions_v9.3.yaml
+# Authoritative → Runtime-only mirror
+# Exclude dev, build, CI, docs, and pipeline artifacts
+# =====================================================================
+
+# --- Python caches / tooling ---------------------------------------------------
+- __pycache__/
+- **/__pycache__/
+- *.pyc
+- *.pyo
+- .mypy_cache/
+- .pytest_cache/
+- .ruff_cache/
+- .coverage
+- .coverage.*
+
+# --- Temp / debug / noise ------------------------------------------------------
+- *.checkpoint.json
+- *.log
+- *.tmp
+
+# --- IDE / workspace / docs ----------------------------------------------------
+- *.code-workspace
+- .forensic_suite.code-workspace
+- *.md
+- *.ipynb
+- *.drawio
+
+# --- Data / exports not needed in runtime mirror --------------------------------
+- *.csv
+- *.txt
+
+# --- Binary artifacts / installers / wheels ------------------------------------
+- *.zip
+- *.exe
+- *.msi
+- wheel/
+- dist/
+- build/
+- Output/
+- forensic_suite_v2.egg-info/
+
+# --- Legacy / orchestrator dev tree --------------------------------------------
+- legacy/
+- ForensicSuite.Orchestrator/
+
+# --- Repo‑level dev / CI / git -------------------------------------------------
+- .git/
+- .github/
+- .gitignore
+- .gitattributes
+
+# --- Env / config templates at repo root ---------------------------------------
+- .env
+- env.json
+- dot_env.template
+- env.template.json
+- .editorconfig
+- .flake8
+- chains.json
+
+# --- Top‑level dev / pipeline folders (Repo root) ------------------------------
+- dashboards/
+- installer_payload/
+- logs/
+- scripts/
+- tests/
+
+# --- Top‑level dev / pipeline files (Repo root) --------------------------------
+- Auto-Deploy-Full.ps1
+- bootstrap.ps1
+- build_and_deploy.ps1
+- build_final.ps1
+- build.ps1
+- deploy_suite.ps1
+- Disable-Debug.ps1
+- Fix-Imports.ps1
+- ForensicSuite.spec
+- install-module.ps1
+- installer_script.iss
+- Invoke-Deployment.ps1
+- post_install_validation.ps1
+- python-3.14.2-amd64.exe
+- refresh_installer_payload.ps1
+- sitecustomize.py
+- Start-ForensicCluster.ps1
+- Sync-Cluster.ps1
+- test_install.ps1
+- repo_mapping_suite.csv
+
+# --- Sync‑Dev internal tooling (never mirrored) --------------------------------
+- scripts/Sync-DevTrees.*
+- scripts/forensic_suite_repo_mapping.ps1
+- scripts/forensic_suite_rebuild_repo_csv.ps1

@@ -1,0 +1,28 @@
+{
+  "ssh_user": "forensicuser",
+  "ssh_key": "$env:USERPROFILE\\.ssh\\id_ed25519",
+  "installer_local_path": "C:\\development\\forensic_tracer_installer_project_root\\installer_payload\\ForensicSuiteV2-Setup.exe",
+  "remote_installer_path": "C:\\Temp\\ForensicSuiteV2-Setup.exe",
+  "hosts": [
+    {
+      "name": "forensic-db-1",
+      "ip": "192.168.0.199",
+      "roles": ["forensic", "btc", "eth", "tron"]
+    },
+    {
+      "name": "forensic-db-2",
+      "ip": "192.168.0.165",
+      "roles": ["forensic", "btc"]
+    },
+    {
+      "name": "forensic-db-3",
+      "ip": "192.168.0.146",
+      "roles": ["forensic", "tron"]
+    },
+    {
+      "name": "backup-host-1",
+      "ip": "192.168.0.28",
+      "roles": ["backup", "tron"]
+    }
+  ]
+}

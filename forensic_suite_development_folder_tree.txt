@@ -1,0 +1,88 @@
+C:\development
+│
+├── forensic_suite_v2                     ← Suite source repo (Git)
+│   │
+│   ├── .editorconfig
+│   ├── .flake8
+│   ├── .gitattributes
+│   ├── .gitignore
+│   ├── build_and_deploy_all.ps1
+│   ├── chains.json
+│   ├── COPILOT_INSTRUCTIONS.md
+│   ├── deploy_suite.ps1
+│   ├── DEVELOPER_ONBOARDING.md
+│   ├── healthcheck.ps1
+│   ├── merge_suite.ps1
+│   ├── post_deploy_verification.ps1
+│   ├── pre_deploy_validator.ps1
+│   ├── pyproject.toml
+│   ├── README.md
+│   ├── rollback.ps1
+│   │
+│   ├── forensic_suite_v2/                ← Python package root
+│   │   ├── btc_indexer/
+│   │   ├── eth_indexer/
+│   │   ├── tron_indexer/
+│   │   ├── cli/
+│   │   ├── core/
+│   │   ├── dashboards/
+│   │   ├── scripts/
+│   │   ├── tools/
+│   │   ├── config/
+│   │   ├── plugins/
+│   │   ├── sql/
+│   │   ├── gui/
+│   │   ├── tests/
+│   │   └── __init__.py
+│   │
+│   ├── forensic_suite_v2.egg-info/
+│   ├── grafana/
+│   └── indexers/                         ← legacy folder (safe to keep)
+│
+└── forensic_tracer_installer_project_root   ← Monorepo root (Git)
+    │
+    ├── .git/
+    ├── .editorconfig
+    ├── .gitattributes
+    ├── .gitignore
+    ├── .forensic_suite.code-workspace
+    │
+    ├── .vscode/
+    │   ├── launch.json
+    │   └── tasks.json
+    │
+    ├── ForensicSuite.spec
+    ├── Invoke-Deployment.ps1
+    ├── Start-ForensicCluster.ps1
+    ├── Sync-Cluster.ps1
+    ├── deploy_suite.ps1
+    ├── env.json
+    │
+    ├── forensic_suite_v2/                ← Full suite source (mirrors above)
+    │   ├── btc_indexer/
+    │   ├── eth_indexer/
+    │   ├── tron_indexer/
+    │   ├── cli/
+    │   ├── core/
+    │   ├── dashboards/
+    │   ├── scripts/
+    │   ├── tools/
+    │   ├── config/
+    │   ├── plugins/
+    │   ├── sql/
+    │   ├── gui/
+    │   ├── tests/
+    │   └── __init__.py
+    │
+    ├── installer_payload/
+    │   ├── dashboards/
+    │   ├── db/
+    │   ├── scripts/
+    │   ├── tools/
+    │   ├── forensic_suite_v2-*.whl
+    │   └── bootstrap.ps1
+    │
+    ├── refresh_installer_payload.ps1
+    ├── restore_installer_payload.ps1
+    ├── requirements.txt
+    └── test_install.ps1

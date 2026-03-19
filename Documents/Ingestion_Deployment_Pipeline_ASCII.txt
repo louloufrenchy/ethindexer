@@ -1,0 +1,25 @@
+                          ┌──────────────────────────────┐
+                          │   Repo A (Control Host)       │
+                          │   Build + Deploy Orchestrator │
+                          └───────────────┬───────────────┘
+                                          │
+                                          │ Deploy-Cluster.ps1
+                                          ▼
+        ┌──────────────────────────────┬──────────────────────────────┬──────────────────────────────┐
+        │                              │                              │                              │
+        ▼                              ▼                              ▼                              ▼
+┌──────────────────┐        ┌──────────────────┐        ┌──────────────────┐        ┌──────────────────┐
+│ 192.168.0.172     │        │ 192.168.0.165     │        │ 192.168.0.199     │        │ 192.168.0.28      │
+│ BTC ingestion     │        │ TRON ingestion    │        │ ETH ingestion     │        │ Postgres only      │
+└─────────┬─────────┘        └─────────┬─────────┘        └─────────┬─────────┘        └─────────┬─────────┘
+          │                              │                              │                              │
+          ▼                              ▼                              ▼                              ▼
+  indexer.yaml (btc)            indexer.yaml (tron)           indexer.yaml (eth)              DB writes
+  .env                           .env                           .env
+  orchestrator restart           orchestrator restart           orchestrator restart
+          │                              │                              │
+          ▼                              ▼                              ▼
+  BTC indexer running            TRON indexer running           ETH indexer running
+  Orchestrator running           Orchestrator running           Orchestrator running
+          │                              │                              │
+          └───────────────► All write to Postgres on 192.168.0.28 ◄────┘

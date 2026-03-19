@@ -1,0 +1,135 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# Virtual environments
+venv/
+env/
+
+# Installer artifacts
+*.whl
+dist/
+build/
+*.egg-info/
+
+# Logs
+*.log
+logs/
+*.tmp
+
+# Environment files
+.env
+.env.*
+
+# VS Code
+.vscode/
+.history/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PowerShell
+*.ps1xml
+*.psc1
+
+# SQL temp
+*.sql.tmp
+
+# Cache
+.cache/
+# PowerShell build artifacts
+*.psd1
+*.psm1.tmp
+*.ps1.tmp
+
+# Python build artifacts
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+.eggs/
+pip-wheel-metadata/
+
+# PyInstaller
+*.spec
+*.manifest
+*.dll
+*.pyd
+*.pkg
+*.toc
+*.tmp
+*.bak
+*.log
+
+# Installer build output
+Output/
+installer_payload/build/
+installer_payload/output/
+installer_payload/ForensicSuite/
+*.exe
+*.msi
+*.whl
+*.zip
+*.7z
+
+# Temporary build folders
+build_tmp/
+temp/
+tmp/
+
+# Virtual environments
+venv/
+.venv/
+.env/
+.env*/
+*.env
+env.json
+secrets.json
+
+# Indexer runtime state
+forensic_suite_v2/*_indexer/*_checkpoint.json
+forensic_suite_v2/*_indexer/checkpoints/
+*.checkpoint
+*.state
+
+# Logs
+logs/
+*.log
+operator_console.log
+healthcheck.log
+deployment.log
+
+# Backups
+backup_forensic_suite_v2_*/
+backup_*/
+*.bak
+
+# IDE/editor noise
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS noise
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Git noise
+.git/
+
+*.whl
+installer_payload/ForensicSuite/
+# Grafana exports
+*.json.tmp
+grafana_export/
+
+# Misc
+*.tmp
+tmp/
+temp/

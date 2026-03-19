@@ -1,0 +1,52 @@
+{
+  "title": "ForensicSuite v2 - Multi-Chain Indexer",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Indexer Lag per Chain",
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, lag AS value, chain AS metric FROM indexer_metrics ORDER BY ts",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "BTC Blocks Ingested per Minute",
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('minute', ts) AS time, COUNT(*) AS value FROM btc_blocks GROUP BY 1 ORDER BY 1",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "TRON Transactions per Minute",
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('minute', ts) AS time, COUNT(*) AS value FROM tron_transactions GROUP BY 1 ORDER BY 1",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "ETH Transactions per Minute",
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('minute', ts) AS time, COUNT(*) AS value FROM eth_transactions GROUP BY 1 ORDER BY 1",
+          "refId": "D"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 38,
+  "version": 1
+}

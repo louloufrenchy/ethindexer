@@ -1,0 +1,15 @@
+aiohttp
+asyncpg
+orjson
+prometheus_client
+psycopg2-binary
+python-dotenv
+PyYAML
+requests
+
+# GUI dependencies
+PySide6
+qt-material
+qasync
+pyqtgraph
+pillow

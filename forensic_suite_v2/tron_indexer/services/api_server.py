@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import os
+=======
+import sys, os
+>>>>>>> master
 import yaml
 import asyncpg
 import aiohttp
@@ -6,6 +10,13 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+<<<<<<< HEAD
+=======
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
+>>>>>>> master
 BASE_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = BASE_DIR / "config" / "indexer.yaml"
 CONFIG_PATH = os.environ.get("CONFIG_PATH", str(DEFAULT_CONFIG))
@@ -16,6 +27,11 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = BASE_DIR / "config" / "indexer.yaml"
 CONFIG_PATH = os.environ.get("CONFIG_PATH", str(DEFAULT_CONFIG))
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> master
 # import debugpy
 # debugpy.listen(("0.0.0.0", 5678))
 # print("Waiting for debugger attach on port 5678...")

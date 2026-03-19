@@ -1,5 +1,8 @@
 # forensic_suite_v2/cli/__main__.py
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 import argparse
 import asyncio
 from datetime import datetime
@@ -12,6 +15,12 @@ from forensic_suite_v2.core.trace_engine import (
 )
 
 
+<<<<<<< HEAD
+=======
+# ---------------------------------------------------------------------
+# Manifest Builder
+# ---------------------------------------------------------------------
+>>>>>>> master
 def build_manifest(name, seed):
     return TraceManifestV2(
         name=name,
@@ -21,6 +30,12 @@ def build_manifest(name, seed):
     )
 
 
+<<<<<<< HEAD
+=======
+# ---------------------------------------------------------------------
+# Command Handlers
+# ---------------------------------------------------------------------
+>>>>>>> master
 def cmd_trace_address(args):
     seed = TraceSeed(
         chain=args.chain,
@@ -88,6 +103,12 @@ def cmd_multi_chain(args):
     )
 
 
+<<<<<<< HEAD
+=======
+# ---------------------------------------------------------------------
+# Main CLI Entrypoint
+# ---------------------------------------------------------------------
+>>>>>>> master
 def main():
     parser = argparse.ArgumentParser(prog="forensic-suite-v2-trace")
     sub = parser.add_subparsers(dest="cmd", required=True)

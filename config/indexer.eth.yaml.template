@@ -1,0 +1,31 @@
+postgres:
+  host: 192.168.0.28
+  port: 5432
+  user: postgres
+  password: ${PGPASSWORD}
+  database: forensic
+  min_pool: 1
+  max_pool: 10
+  timeout: 60
+
+eth:
+  enabled: true
+  http_endpoint: "${QUICKNODE_ETH_HTTP}"
+  wss_endpoint: "${QUICKNODE_ETH_WSS}"
+  start_block: 0
+  batch_size: 1000
+  parallel_fetchers: 5
+  worker_threads: 4
+  reorg_depth: 6
+  max_retries: 5
+  retry_delay: 2
+
+logging:
+  level: "INFO"
+  file: "logs/indexer_eth.log"
+  rotate: true
+  max_size_mb: 20
+  backups: 5
+
+chains:
+  - eth

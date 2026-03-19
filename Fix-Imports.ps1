@@ -1,5 +1,5 @@
-﻿# Fix-Imports.ps1
-$Root = "C:\development\forensic_tracer_installer_project_root\forensic_suite_v2"
+# Fix-Imports.ps1
+$Root = "F:\DEVELOPMENT\Repo_A\forensic_tracer_installer_project_root\forensic_suite_v2"
 
 Write-Host "=== Fixing Forensic Suite Imports ===" -ForegroundColor Cyan
 

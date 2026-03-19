@@ -1,8 +1,8 @@
 # Auto-Test-Prep.ps1
 # Full automation: Sync, Clean Cache, and Verify for Testing.
 
-$primaryRoot = "C:\development\forensic_tracer_installer_project_root"
-$testRepoPath = "C:\development\forensic_suite_v2\forensic_suite_v2"
+$primaryRoot = "F:\DEVELOPMENT\Repo_A\forensic_tracer_installer_project_root"
+$testRepoPath = "F:\DEVELOPMENT\Repo_B\forensic_suite_v2\forensic_suite_v2"
 
 Write-Host "--- Starting Test Environment Preparation ---" -ForegroundColor Magenta
 

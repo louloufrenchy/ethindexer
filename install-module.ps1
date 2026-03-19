@@ -1,5 +1,9 @@
 param(
+<<<<<<< HEAD
     [string]$Root = "C:\development\forensic_tracer_installer_project_root"
+=======
+    [string]$Root = "F:\DEVELOPMENT\Repo_A\forensic_tracer_installer_project_root"
+>>>>>>> master
 )
 
 $moduleSource = Join-Path $Root "ForensicSuite.Orchestrator"

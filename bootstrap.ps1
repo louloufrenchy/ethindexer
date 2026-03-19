@@ -13,7 +13,11 @@ Write-Host "=== Forensic Suite Installer Bootstrap ===" -ForegroundColor Cyan
 # ---------------------------------------------
 # 1. Ensure secrets directory exists
 # ---------------------------------------------
+<<<<<<< HEAD
 $secretRoot = "C:\forensic_secrets"
+=======
+$secretRoot = "F:\forensic_secrets"
+>>>>>>> master
 
 if (!(Test-Path $secretRoot)) {
     Write-Host "Creating secrets directory at $secretRoot" -ForegroundColor Yellow

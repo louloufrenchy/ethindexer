@@ -4,7 +4,11 @@ Forensic Suite v2 — Unified Multi‑Chain Forensic Platform
 
 from .core.engine import Engine
 from .core.plugin_loader import discover_plugins
+<<<<<<< HEAD
 from .core.logging import get_logger
+=======
+from .core.fs_logging import get_logger
+>>>>>>> master
 
 from .btc_indexer.services.run_btc_indexer_v2 import main as run_btc
 from .eth_indexer.services.run_eth_indexer_v2 import main as run_eth

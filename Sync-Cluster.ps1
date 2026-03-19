@@ -18,7 +18,7 @@ if (-not $nodesToSync) {
     exit
 }
 
-$sourcePath = "C:\development\forensic_suite_v2"
+$sourcePath = "F:\DEVELOPMENT\Repo_B\forensic_suite_v2"
 
 foreach ($node in $nodesToSync) {
     # Based on your 'net use' output, we know 192.168.0.28 is I:

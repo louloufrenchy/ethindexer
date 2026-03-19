@@ -10,7 +10,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from forensic_suite_v2.core.plugin_loader import discover_plugins
+<<<<<<< HEAD
 from forensic_suite_v2.core.logging import get_logger
+=======
+from forensic_suite_v2.core.fs_logging import get_logger
+>>>>>>> master
 
 
 log = get_logger("trace_engine")

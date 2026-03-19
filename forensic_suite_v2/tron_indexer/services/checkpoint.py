@@ -6,8 +6,14 @@ from typing import Any
 
 class TronCheckpoint:
     def __init__(self, config: Any = None):
+<<<<<<< HEAD
         base = Path(__file__).resolve().parents[1]
         self.path = base / "tron_checkpoint.json"
+=======
+        self.dir_path = Path(r"C:\forensic_state\tron")
+        self.dir_path.mkdir(parents=True, exist_ok=True)
+        self.path = self.dir_path / "tron_checkpoint.json"
+>>>>>>> master
 
     async def load(self) -> int:
         if not self.path.exists():
@@ -19,6 +25,13 @@ class TronCheckpoint:
             return 0
 
     async def save(self, height: int) -> None:
+<<<<<<< HEAD
         data = {"last_block": int(height)}
         self.path.write_text(json.dumps(data), encoding="utf-8")
         await asyncio.sleep(0)
+=======
+        self.dir_path.mkdir(parents=True, exist_ok=True)
+        data = {"last_block": int(height)}
+        self.path.write_text(json.dumps(data), encoding="utf-8")
+        await asyncio.sleep(0)
+>>>>>>> master

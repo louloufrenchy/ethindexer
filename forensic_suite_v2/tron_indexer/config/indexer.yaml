@@ -1,7 +1,11 @@
 database:
   engine: "postgres"
   postgres:
+<<<<<<< HEAD
     host: "localhost"
+=======
+    host: 192.168.0.28
+>>>>>>> master
     port: 5432
     user: postgres
     password: Str0ngPassw0rd2025

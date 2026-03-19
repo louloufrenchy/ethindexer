@@ -1,5 +1,9 @@
 from forensic_suite_v2.core.plugin_loader import discover_plugins
+<<<<<<< HEAD
 from forensic_suite_v2.core.logging import get_logger
+=======
+from forensic_suite_v2.core.fs_logging import get_logger
+>>>>>>> master
 from forensic_suite_v2.core.indexer_engine import BaseIndexerService
 
 class Engine:

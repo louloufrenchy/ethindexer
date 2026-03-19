@@ -325,3 +325,9 @@ class MainWindow(QMainWindow):
                 "All required dashboards, scripts, and plugins are present.",
             )
             self.statusBar().showMessage("Validation successful", 5000)
+<<<<<<< HEAD
+=======
+
+if __name__ == "__main__":
+    launch_gui()
+>>>>>>> master

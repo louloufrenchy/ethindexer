@@ -4,6 +4,14 @@ from pathlib import Path
 from forensic_suite_v2.scripts.healthcheck import run_healthcheck
 from forensic_suite_v2.scripts.operator_console import OperatorConsole
 
+<<<<<<< HEAD
+=======
+import sys, os
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
+>>>>>>> master
 def load_manifest():
     with open("chains.json", "r") as f:
         return json.load(f)["chains"]

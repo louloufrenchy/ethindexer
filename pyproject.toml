@@ -31,11 +31,27 @@ dependencies = [
 ]
 
 [project.scripts]
+<<<<<<< HEAD
+=======
+# --- Core Indexers ---
+forensic-suite-v2-run-btc-indexer = "forensic_suite_v2.btc_indexer.services.run_btc_indexer_v2:main"
+forensic-suite-v2-run-eth-indexer = "forensic_suite_v2.eth_indexer.services.run_eth_indexer_v2:main"
+forensic-suite-v2-run-tron-indexer = "forensic_suite_v2.tron_indexer.services.run_tron_indexer_v2:main"
+
+# --- Optional Daemons ---
+forensic-suite-v2-run-tron-token-daemon = "forensic_suite_v2.tron_indexer.services.token_daemon:main"
+forensic-suite-v2-run-api-server = "forensic_suite_v2.tron_indexer.services.api_server:main"
+
+# --- Existing CLI Tools (unchanged) ---
+>>>>>>> master
 forensic-suite-v2 = "forensic_suite_v2.cli.__main__:cli"
 forensic-suite-v2-gui = "forensic_suite_v2.gui.app:launch_gui"
 forensic-suite-v2-dashboard = "forensic_suite_v2.cli.__main__:dashboard"
 forensic-suite-v2-run-all = "forensic_suite_v2.cli.__main__:run_all"
+<<<<<<< HEAD
 forensic-suite-v2-run-indexer = "forensic_suite_v2.cli.__main__:run_indexer"
+=======
+>>>>>>> master
 forensic-suite-v2-health = "forensic_suite_v2.cli.__main__:health_api"
 
 [tool.setuptools.packages.find]

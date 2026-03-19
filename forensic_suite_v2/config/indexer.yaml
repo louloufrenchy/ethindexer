@@ -4,11 +4,19 @@
 # ============================
 
 postgres:
+<<<<<<< HEAD
   host: "${PGHOST}"
   port: ${PGPORT}
   user: "${PGUSER}"
   password: "${PGPASSWORD}"
   database: "${PGDATABASE}"
+=======
+  host: 192.168.0.28
+  port: 5432
+  user: postgres
+  password: Str0ngPassw0rd2025
+  database: forensic
+>>>>>>> master
   min_pool: 1
   max_pool: 10
   timeout: 60
@@ -58,3 +66,11 @@ logging:
   rotate: true
   max_size_mb: 20
   backups: 5
+<<<<<<< HEAD
+=======
+
+chains:
+  - tron
+  - eth
+  - btc
+>>>>>>> master

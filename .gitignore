@@ -133,3 +133,5 @@ grafana_export/
 *.tmp
 tmp/
 temp/
+_temp_installed/
+temp_installed/

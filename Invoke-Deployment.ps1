@@ -2,7 +2,7 @@
 Import-Module ".\installer_payload\ForensicSuite\scripts\orchestrator\Orchestrator.psm1" -Force
 
 # Resolve paths locally where we know they work
-$localInstaller = "C:\development\forensic_tracer_installer_project_root\Output\ForensicSuiteV2-Setup.exe"
+$localInstaller = "F:\DEVELOPMENT\Repo_A\forensic_tracer_installer_project_root\Output\ForensicSuiteV2-Setup.exe"
 $sshKey = "$env:USERPROFILE\.ssh\id_ed25519"
 $remotePath = "C:\Temp\ForensicSuiteV2-Setup.exe"
 

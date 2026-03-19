@@ -1,5 +1,5 @@
 # Disable-Debug.ps1 - Global Hardening
-$ProjectRoot = "C:\development\forensic_tracer_installer_project_root\forensic_suite_v2"
+$ProjectRoot = "F:\DEVELOPMENT\Repo_A\forensic_tracer_installer_project_root\forensic_suite_v2"
 
 # Target ALL Python files to catch rogue imports in API and core scripts
 $targetFiles = Get-ChildItem -Path $ProjectRoot -Filter "*.py" -Recurse

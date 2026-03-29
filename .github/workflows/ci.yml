@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          run: pip install -r forensic_suite_v2/requirements.runtime.txt
+          pip install -r forensic_suite_v2/requirements.runtime.txt
           pip install pytest build asyncpg pyyaml
 
       - name: Validate plugins

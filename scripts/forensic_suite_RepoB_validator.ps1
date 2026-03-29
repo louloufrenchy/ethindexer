@@ -154,6 +154,7 @@ if (Test-Path $scripts) {
         "healthcheck.py",
         "healthcheck_core.py",
         "install_services.ps1",
+        "install_services.py",
         "operator_console.ps1",
         "operator_console.py",
         "start_all_indexers.py",

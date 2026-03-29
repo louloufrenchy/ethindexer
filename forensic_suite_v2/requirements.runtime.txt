@@ -6,6 +6,11 @@ psycopg2-binary
 python-dotenv
 PyYAML
 requests
+psycopg2
+textual
+uvicorn
+uvicorn[standard]
+fastapi
 
 # GUI dependencies
 PySide6

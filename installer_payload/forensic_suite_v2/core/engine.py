@@ -1,30 +1,27 @@
-from forensic_suite_v2.core.plugin_loader import discover_plugins
-from forensic_suite_v2.core.fs_logging import get_logger
-from forensic_suite_v2.core.indexer_engine import BaseIndexerService
+import logging
 
 class Engine:
+    """
+    Core engine responsible for:
+    - holding plugin instances
+    - dispatching trace requests
+    """
+
     def __init__(self):
-        # Holds plugins by name
-        self.plugins = discover_plugins()
+        self.plugins = {}
 
-    def register_plugin(self, plugin):
+    def trace(self, chain: str, target=None):
         """
-        Register a plugin instance.
-        Plugin must define:
-            - name (str)
-            - description (str)
-            - trace(target) method
+        Dispatch a trace request to the appropriate plugin.
         """
-        name = plugin.name.lower()
-        self.plugins[name] = plugin
-
-    def trace(self, chain, target=None):
-        """
-        Run the tracer for a specific chain.
-        """
-        chain = chain.lower()
         if chain not in self.plugins:
             raise ValueError(f"No plugin registered for chain '{chain}'")
 
         plugin = self.plugins[chain]
-        return plugin.trace(target)
+
+        try:
+            logging.info(f"Engine.trace: chain={chain}, target={target}")
+            return plugin.trace(target)
+        except Exception as exc:
+            logging.exception(f"Trace failed for chain '{chain}': {exc}")
+            raise

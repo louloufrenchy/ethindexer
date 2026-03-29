@@ -1,23 +1,24 @@
 import asyncio
 import logging
+import subprocess
 import traceback
 from pathlib import Path
-from typing import Any, Dict
-from types import SimpleNamespace
+from typing import Dict, List
 
 import orjson
 import yaml
 
-from forensic_suite_v2.btc_indexer.services.btc_indexer_service import BtcIndexerService
-from forensic_suite_v2.eth_indexer.services.eth_indexer_service import EthIndexerService
-from forensic_suite_v2.tron_indexer.services.tron_indexer_service import TronIndexerService
-
 
 class JsonLogger(logging.LoggerAdapter):
     def process(self, msg, kwargs):
+        try:
+            ts = asyncio.get_running_loop().time()
+        except RuntimeError:
+            ts = 0.0
+
         base = {
             "msg": msg,
-            "ts": asyncio.get_event_loop().time(),
+            "ts": ts,
             "component": "orchestrator",
         }
         if "extra" in kwargs:
@@ -32,97 +33,111 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = BASE_DIR / "config" / "indexer.yaml"
 
 
-def load_config() -> Dict[str, Any]:
-    with open(DEFAULT_CONFIG, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+def load_monitored_services() -> List[str]:
+    raw = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8")) or {}
+
+    services: List[str] = []
+    if raw.get("btc", {}).get("enabled", False):
+        services.append("btc_indexer")
+    if raw.get("eth", {}).get("enabled", False):
+        services.append("eth_indexer")
+    if raw.get("tron", {}).get("enabled", False):
+        services.append("tron_indexer")
+
+    return services
 
 
-def to_namespace(value: Any) -> Any:
-    if isinstance(value, dict):
-        return SimpleNamespace(**{k: to_namespace(v) for k, v in value.items()})
-    if isinstance(value, list):
-        return [to_namespace(v) for v in value]
-    return value
+def _run_command(cmd: List[str]) -> subprocess.CompletedProcess:
+    return subprocess.run(cmd, capture_output=True, text=True)
 
 
-async def supervised_task(name: str, service, restart_delay: float = 5.0):
+def get_service_status(service_name: str) -> str:
+    ps_cmd = (
+        f"$svc = Get-Service -Name '{service_name}' -ErrorAction SilentlyContinue; "
+        f"if ($null -eq $svc) {{ 'MISSING' }} else {{ $svc.Status.ToString().ToUpperInvariant() }}"
+    )
+    result = _run_command(
+        ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps_cmd]
+    )
+
+    if result.returncode != 0:
+        stderr = (result.stderr or "").strip()
+        if stderr:
+            log.error("Service status query failed", extra={"service": service_name, "stderr": stderr})
+        return "ERROR"
+
+    return (result.stdout or "").strip().upper() or "UNKNOWN"
+
+
+def start_service(service_name: str) -> bool:
+    result = _run_command(["sc", "start", service_name])
+
+    if result.returncode != 0:
+        log.error(
+            "Failed to start service",
+            extra={
+                "service": service_name,
+                "returncode": result.returncode,
+                "stdout": (result.stdout or "").strip(),
+                "stderr": (result.stderr or "").strip(),
+            },
+        )
+        return False
+
+    log.info("Start requested for service", extra={"service": service_name})
+    return True
+
+
+async def watchdog(interval: float = 10.0):
+    monitored_services = load_monitored_services()
+
     while True:
-        try:
-            log.info("Starting chain service", extra={"chain": name})
-            await service.run()
-        except asyncio.CancelledError:
-            log.info("Supervisor cancelled", extra={"chain": name})
-            break
-        except Exception as e:
-            log.error(
-                "Chain crashed",
-                extra={"chain": name, "error": str(e), "trace": traceback.format_exc()},
-            )
-            log.info("Restarting chain soon", extra={"chain": name, "delay": restart_delay})
-            await asyncio.sleep(restart_delay)
+        statuses: Dict[str, str] = {}
 
+        for service_name in monitored_services:
+            status = get_service_status(service_name)
+            statuses[service_name] = status
 
-async def watchdog(tasks: Dict[str, asyncio.Task], interval: float = 10.0):
-    while True:
-        await asyncio.sleep(interval)
-        statuses = {}
-        for name, task in tasks.items():
-            if task.cancelled():
-                statuses[name] = "CANCELLED"
-            elif task.done():
-                statuses[name] = "DONE"
-            else:
-                statuses[name] = "RUNNING"
+            if status == "STOPPED":
+                log.warning("Service stopped; requesting start", extra={"service": service_name, "status": status})
+                start_service(service_name)
+            elif status == "PAUSED":
+                log.warning("Service paused; manual intervention required", extra={"service": service_name})
+            elif status == "MISSING":
+                log.warning("Service missing", extra={"service": service_name})
+            elif status == "ERROR":
+                log.warning("Service query error", extra={"service": service_name})
+            elif status not in ("RUNNING", "START_PENDING"):
+                log.warning("Unexpected service status", extra={"service": service_name, "status": status})
 
         log.info("Watchdog status", extra={"statuses": statuses})
+        await asyncio.sleep(interval)
 
 
 async def main():
     logging.basicConfig(level=logging.INFO)
 
-    raw_cfg = load_config()
-    cfg = to_namespace(raw_cfg)
-
-    chains = raw_cfg.get("chains", ["tron"])
-
-    log.info("Orchestrator starting", extra={"chains": chains})
-
-    tasks: Dict[str, asyncio.Task] = {}
-
-    if "tron" in chains and getattr(cfg, "tron", None) and getattr(cfg.tron, "enabled", True):
-        tron_service = TronIndexerService(cfg.tron)
-        tasks["tron"] = asyncio.create_task(
-            supervised_task("tron", tron_service), name="tron_supervisor"
-        )
-
-    if "eth" in chains and getattr(cfg, "eth", None) and getattr(cfg.eth, "enabled", True):
-        eth_service = EthIndexerService(cfg.eth)
-        tasks["eth"] = asyncio.create_task(
-            supervised_task("eth", eth_service), name="eth_supervisor"
-        )
-
-    if "btc" in chains and getattr(cfg, "btc", None) and getattr(cfg.btc, "enabled", True):
-        btc_service = BtcIndexerService(cfg.btc)
-        tasks["btc"] = asyncio.create_task(
-            supervised_task("btc", btc_service), name="btc_supervisor"
-        )
-
-    if not tasks:
-        log.error("No chains enabled — nothing to run")
-        return
-
-    wd = asyncio.create_task(watchdog(tasks), name="orchestrator_watchdog")
+    monitored = load_monitored_services()
+    log.info(
+        "Orchestrator starting",
+        extra={
+            "mode": "service-monitor",
+            "monitored_services": monitored,
+            "cwd": str(Path.cwd()),
+        },
+    )
 
     try:
-        await asyncio.gather(*tasks.values())
+        await watchdog()
     except asyncio.CancelledError:
         log.info("Orchestrator cancelled")
-    finally:
-        wd.cancel()
-        try:
-            await wd
-        except asyncio.CancelledError:
-            pass
+        raise
+    except Exception as exc:
+        log.error(
+            "Orchestrator crashed",
+            extra={"error": str(exc), "trace": traceback.format_exc()},
+        )
+        raise
 
 
 if __name__ == "__main__":

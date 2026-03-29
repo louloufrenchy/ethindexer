@@ -27,11 +27,7 @@ function Step {
 # ---------------------------------------------
 # 0. Ensure secrets directory exists (fallback)
 # ---------------------------------------------
-<<<<<<< HEAD
-$secretRoot = "C:\forensic_secrets"
-=======
 $secretRoot = "F:\forensic_secrets"
->>>>>>> master
 
 if (!(Test-Path $secretRoot)) {
     Write-Host "Creating secrets directory at $secretRoot" -ForegroundColor Yellow

@@ -186,10 +186,6 @@ function Invoke-Step {
 
     Write-Host "Step '$Name' succeeded." -ForegroundColor Green
     return $true
-<<<<<<< HEAD
-}
-=======
 }
 
 Export-ModuleMember -Function Invoke-ForensicDeployment
->>>>>>> master

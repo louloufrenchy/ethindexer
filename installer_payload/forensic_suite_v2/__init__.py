@@ -13,6 +13,8 @@ from .tron_indexer.services.run_tron_indexer_v2 import main as run_tron
 from .scripts.healthcheck import run_healthcheck
 from .scripts.operator_console import OperatorConsole
 
+__version__ = "0.1.3"
+
 __all__ = [
     "Engine",
     "discover_plugins",

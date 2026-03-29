@@ -351,75 +351,183 @@ function Invoke-ForensicRelease {
     return $LASTEXITCODE
 }
 
-function Populate-RuntimeDependencies {
-    <#
-    .SYNOPSIS
-        Populates the slot-local Python runtime with all required dependencies.
-
-    .DESCRIPTION
-        - Wipes old site-packages (but preserves interpreter binaries)
-        - Installs runtime dependencies from requirements.runtime.txt
-        - Installs the freshly built wheel
-        - Produces a fully self-contained runtime for deployment
-    #>
-
+function Prepare-And-Sync-Secrets {
     [CmdletBinding()]
-    param()
+    param(
+        [Parameter(Mandatory=$true)]
+        [string[]]$Hosts
+    )
 
-    Set-StrictMode -Version Latest
-    $ErrorActionPreference = "Stop"
+    # Resolve project root (module lives in forensic_suite_v2\forensic_suite_v2)
+    $projectRoot = Split-Path -Parent $PSScriptRoot
 
-    Write-Host "=== Populating slot-local Python runtime ===" -ForegroundColor Cyan
+    # Real script location
+    $scriptPath = Join-Path $projectRoot "scripts\validation\Prepare-And-Sync-Secrets.ps1"
 
-    # Correct module-safe root resolution
-    $ScriptRoot = $PSScriptRoot
-    $RepoRoot   = Split-Path -Parent $PSScriptRoot
-
-    $Runtime = Join-Path $RepoRoot "forensic_suite_v2\runtime\python"
-    $ReqFile = Join-Path $RepoRoot "forensic_suite_v2\requirements.runtime.txt"
-    $Wheel   = Get-ChildItem (Join-Path $RepoRoot "dist") -Filter "forensic_suite_v2-*.whl" |
-               Sort-Object LastWriteTime -Descending |
-               Select-Object -First 1
-
-    if (-not (Test-Path $Runtime)) {
-        throw "Runtime folder not found: $Runtime"
-    }
-    if (-not (Test-Path $ReqFile)) {
-        throw "Runtime requirements file missing: $ReqFile"
-    }
-    if (-not $Wheel) {
-        throw "No wheel found in dist\"
+    if (-not (Test-Path $scriptPath)) {
+        throw "Prepare-And-Sync-Secrets.ps1 not found at: $scriptPath"
     }
 
-    Write-Host "Runtime root : $Runtime" -ForegroundColor Gray
-    Write-Host "Wheel        : $($Wheel.Name)" -ForegroundColor Gray
+    # Dot-source the real script with parameters
+    . $scriptPath -Hosts $Hosts
+}
 
-    # ------------------------------------------------------------------
-    # 1. Clean old site-packages (but preserve interpreter binaries)
-    # ------------------------------------------------------------------
-    Write-Host "[CLEAN] Removing old site-packages..." -ForegroundColor Yellow
+function Populate-RuntimeDependencies {
+    [CmdletBinding()]
+    param(
+        [string]$RepoRoot = $(if ($Global:PrimaryRoot) {
+                                  $Global:PrimaryRoot
+                              } else {
+                                  (Resolve-Path "$PSScriptRoot\..\..").Path
+                              }),
+        [string]$EmbedSourceRelative = 'third_party\python_embed',
+        [string]$RuntimeRelative     = 'runtime\python',
+        [string]$WheelGlob           = 'dist\forensic_suite_v2-*.whl',
+        [string]$RequirementsPath    = 'forensic_suite_v2\requirements.runtime.txt'
+    )
 
-    Get-ChildItem $Runtime |
-        Where-Object {
-            $_.Name -notmatch '^python(314|3)?(\.dll|\.exe|\.zip|\.cat)?$' -and
-            $_.Name -notmatch '^vcruntime' -and
-            $_.Name -notmatch '^_.*\.pyd$'
-        } |
-        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+    $ErrorActionPreference = 'Stop'
 
-    # ------------------------------------------------------------------
-    # 2. Install runtime dependencies
-    # ------------------------------------------------------------------
-    Write-Host "[INSTALL] Installing runtime dependencies..." -ForegroundColor Cyan
-    pip install -r $ReqFile --target $Runtime
+    Write-Host "=== Populate-RuntimeDependencies ===" -ForegroundColor Cyan
+    Write-Host "[INFO] RepoRoot: $RepoRoot"
 
-    # ------------------------------------------------------------------
-    # 3. Install the wheel itself
-    # ------------------------------------------------------------------
-    Write-Host "[INSTALL] Installing wheel into runtime..." -ForegroundColor Cyan
-    pip install $Wheel.FullName --target $Runtime
+    $EmbedSource  = Join-Path $RepoRoot $EmbedSourceRelative
+    $RuntimeRoot  = Join-Path $RepoRoot $RuntimeRelative
+    $WheelPath    = Get-ChildItem -Path (Join-Path $RepoRoot $WheelGlob) -ErrorAction SilentlyContinue |
+                    Sort-Object LastWriteTime -Descending |
+                    Select-Object -First 1
+    $PthFile      = Join-Path $RuntimeRoot 'python314._pth'
+    $PythonExe    = Join-Path $RuntimeRoot 'python.exe'
+    $LibRoot      = Join-Path $RuntimeRoot 'Lib'
+    $SitePackages = Join-Path $LibRoot 'site-packages'
 
-    Write-Host "[OK] Runtime dependencies populated." -ForegroundColor Green
+    Write-Host "[INFO] Embed source : $EmbedSource"
+    Write-Host "[INFO] Runtime root : $RuntimeRoot"
+
+    if (-not (Test-Path $EmbedSource)) {
+        throw "Embedded Python source not found at '$EmbedSource'."
+    }
+
+    if (-not $WheelPath) {
+        throw "No forensic_suite_v2 wheel found matching '$WheelGlob'."
+    }
+
+    Write-Host "[INFO] Using wheel : $($WheelPath.FullName)"
+
+    $RequirementsFull = Join-Path $RepoRoot $RequirementsPath
+    if (-not (Test-Path $RequirementsFull)) {
+        Write-Host "[WARN] Requirements file not found at '$RequirementsFull'. Continuing without extra runtime deps." -ForegroundColor Yellow
+        $RequirementsFull = $null
+    } else {
+        Write-Host "[INFO] Requirements : $RequirementsFull"
+    }
+
+    # 1. Clean and recreate runtime root
+    if (Test-Path $RuntimeRoot) {
+        Write-Host "[CLEAN] Removing existing runtime at '$RuntimeRoot'" -ForegroundColor Yellow
+        Remove-Item $RuntimeRoot -Recurse -Force
+    }
+
+    Write-Host "[CREATE] Creating runtime root at '$RuntimeRoot'" -ForegroundColor Yellow
+    New-Item -ItemType Directory -Path $RuntimeRoot -Force | Out-Null
+
+    # 2. Copy embedded Python source into runtime
+    Write-Host "[COPY] Copying embedded Python from '$EmbedSource' to '$RuntimeRoot'" -ForegroundColor Yellow
+    robocopy $EmbedSource $RuntimeRoot /E /NFL /NDL /NJH /NJS /NC /NS | Out-Null
+
+    if ($LASTEXITCODE -gt 7) {
+        throw "robocopy failed while populating embedded runtime (exit code $LASTEXITCODE)."
+    }
+
+    # 3. Ensure python.exe exists in runtime
+    if (-not (Test-Path $PythonExe)) {
+        throw "python.exe not found in runtime at '$PythonExe'."
+    }
+
+    # 4. Ensure Lib\site-packages exists
+    Write-Host "[CREATE] Ensuring Lib\\site-packages exists" -ForegroundColor Yellow
+    New-Item -ItemType Directory -Path $LibRoot -Force | Out-Null
+    New-Item -ItemType Directory -Path $SitePackages -Force | Out-Null
+
+    # 5. Patch python314._pth so embedded runtime can see Lib and site-packages
+    Write-Host "[PATCH] Writing embedded runtime path configuration to '$PthFile'" -ForegroundColor Yellow
+    @'
+python314.zip
+.
+Lib
+Lib\site-packages
+import site
+'@ | Set-Content -Path $PthFile -Encoding ASCII
+
+    if (-not (Test-Path $PthFile)) {
+        throw "Failed to write '$PthFile'."
+    }
+
+    # 6. Bootstrap pip
+    $GetPip = Join-Path $EmbedSource 'get-pip.py'
+    if (-not (Test-Path $GetPip)) {
+        throw "get-pip.py not found at '$GetPip'."
+    }
+
+    Write-Host "[BOOTSTRAP] Installing pip into embedded runtime" -ForegroundColor Yellow
+    & $PythonExe $GetPip
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to bootstrap pip into the embedded runtime."
+    }
+
+    # 7. Upgrade packaging tools inside embedded runtime
+    Write-Host "[PIP] Upgrading pip/setuptools/wheel in embedded runtime" -ForegroundColor Yellow
+    & $PythonExe -m pip install --no-warn-script-location --no-input --upgrade `
+        pip setuptools wheel `
+        --target "$SitePackages" `
+        --no-cache-dir
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to upgrade pip/setuptools/wheel in embedded runtime."
+    }
+
+    # 8. Install suite wheel into Lib\site-packages
+    Write-Host "[PIP] Installing forensic_suite_v2 wheel into Lib\\site-packages" -ForegroundColor Yellow
+    & $PythonExe -m pip install --no-warn-script-location --no-input --upgrade `
+        "$($WheelPath.FullName)" `
+        --target "$SitePackages" `
+        --no-cache-dir
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "pip install of forensic_suite_v2 wheel failed with exit code $LASTEXITCODE."
+    }
+
+    # 9. Install additional runtime dependencies into Lib\site-packages
+    if ($RequirementsFull) {
+        Write-Host "[PIP] Installing runtime dependencies from '$RequirementsFull' into Lib\\site-packages" -ForegroundColor Yellow
+        & $PythonExe -m pip install --no-warn-script-location --no-input --upgrade `
+            -r "$RequirementsFull" `
+            --target "$SitePackages" `
+            --no-cache-dir
+
+        if ($LASTEXITCODE -ne 0) {
+            throw "pip install of runtime dependencies failed with exit code $LASTEXITCODE."
+        }
+    }
+
+    # 10. Verify embedded runtime path configuration
+    Write-Host "[VERIFY] Embedded runtime sys.path" -ForegroundColor Yellow
+    & $PythonExe -c "import sys; print('\n'.join(sys.path))"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to inspect embedded runtime sys.path."
+    }
+
+    # 11. Verify required imports
+    Write-Host "[VERIFY] Checking embedded runtime imports" -ForegroundColor Yellow
+    & $PythonExe -c "import orjson, yaml, prometheus_client, asyncpg; print('ALL OK')"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Embedded runtime validation failed."
+    }
+
+    Write-Host "[OK] Runtime population complete at '$RuntimeRoot'." -ForegroundColor Green
 }
 
 # =====================================================================
@@ -1584,6 +1692,7 @@ Export-ModuleMember -Function `
     Invoke-Preflight, `
 	Invoke-RemotePS, `
     Populate-RuntimeDependencies, `
+    Prepare-And-Sync-Secrets, `
     Update-InstallerPayload, `
     Restore-Workspace, `
     Sync-ForensicSecretsLocal, `

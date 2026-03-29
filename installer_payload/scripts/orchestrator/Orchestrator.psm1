@@ -1,12 +1,6 @@
 # Orchestrator.psm1 — Stable Minimal Version
 # Requires -Version 7.0
 using namespace System.Management.Automation.Runspaces
-<<<<<<< HEAD
-# ------------------------------------------------------------
-# Load deployment pipeline
-# ------------------------------------------------------------
-=======
->>>>>>> master
 . $PSScriptRoot\Invoke-ForensicDeployment.ps1
 
 # ------------------------------------------------------------
@@ -194,8 +188,4 @@ function Invoke-Step {
     return $true
 }
 
-<<<<<<< HEAD
-
-=======
 Export-ModuleMember -Function Invoke-ForensicDeployment
->>>>>>> master

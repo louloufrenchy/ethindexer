@@ -1,27 +1,36 @@
-import importlib
-import pkgutil
 from pathlib import Path
-import forensic_suite_v2
+import importlib
+import logging
 
-def discover_plugins():
+PLUGIN_ROOT = Path(__file__).resolve().parents[1] / "plugins"
+
+def discover_plugins(enabled_chains=None):
     """
-    Dynamically discover and load all plugins inside forensic_suite_v2/plugins.
-    Returns a dict: { plugin_name: plugin_instance }
+    Discover plugins inside forensic_suite_v2/plugins.
+    Only load plugins whose folder name matches enabled chains.
     """
-    plugin_dir = Path(forensic_suite_v2.__file__).parent / "plugins"
     plugins = {}
 
-    for module in pkgutil.iter_modules([str(plugin_dir)]):
-        name = module.name
-        full_path = f"forensic_suite_v2.plugins.{name}.plugin"
+    if enabled_chains is None:
+        enabled_chains = ["btc", "eth", "tron"]
+
+    for chain in enabled_chains:
+        module_path = PLUGIN_ROOT / chain / "plugin.py"
+        if not module_path.exists():
+            logging.warning(f"Plugin for chain '{chain}' not found at {module_path}")
+            continue
+
         try:
-            mod = importlib.import_module(full_path)
-            plugins[name] = mod.Plugin()
-        except Exception as e:
-            print(f"[WARN] Failed to load plugin {name}: {e}")
+            module_name = f"forensic_suite_v2.plugins.{chain}.plugin"
+            module = importlib.import_module(module_name)
+
+            if hasattr(module, "Plugin"):
+                plugins[chain] = module.Plugin()
+                logging.info(f"Loaded plugin: {chain} ({module_name})")
+            else:
+                logging.warning(f"Plugin module '{module_name}' missing class Plugin")
+
+        except Exception as exc:
+            logging.exception(f"Failed to import plugin module '{chain}': {exc}")
 
     return plugins
-
-load_plugins = discover_plugins
-
-load_plugins = discover_plugins

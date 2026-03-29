@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "forensic-suite-v2"
 version = "0.1.2"
-description = "Forensic Suite v2 – Multi-chain blockchain analysis toolkit"
+description = "Forensic Suite v2 - Multi-chain blockchain analysis toolkit"
 readme = "README.md"
 requires-python = ">=3.10"
 
@@ -31,8 +31,6 @@ dependencies = [
 ]
 
 [project.scripts]
-<<<<<<< HEAD
-=======
 # --- Core Indexers ---
 forensic-suite-v2-run-btc-indexer = "forensic_suite_v2.btc_indexer.services.run_btc_indexer_v2:main"
 forensic-suite-v2-run-eth-indexer = "forensic_suite_v2.eth_indexer.services.run_eth_indexer_v2:main"
@@ -43,15 +41,10 @@ forensic-suite-v2-run-tron-token-daemon = "forensic_suite_v2.tron_indexer.servic
 forensic-suite-v2-run-api-server = "forensic_suite_v2.tron_indexer.services.api_server:main"
 
 # --- Existing CLI Tools (unchanged) ---
->>>>>>> master
 forensic-suite-v2 = "forensic_suite_v2.cli.__main__:cli"
 forensic-suite-v2-gui = "forensic_suite_v2.gui.app:launch_gui"
 forensic-suite-v2-dashboard = "forensic_suite_v2.cli.__main__:dashboard"
 forensic-suite-v2-run-all = "forensic_suite_v2.cli.__main__:run_all"
-<<<<<<< HEAD
-forensic-suite-v2-run-indexer = "forensic_suite_v2.cli.__main__:run_indexer"
-=======
->>>>>>> master
 forensic-suite-v2-health = "forensic_suite_v2.cli.__main__:health_api"
 
 [tool.setuptools.packages.find]

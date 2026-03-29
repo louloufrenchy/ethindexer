@@ -1,4 +1,7 @@
+from typing import Any
+
 from forensic_suite_v2.core.indexer_engine import BaseIndexerService
+
 
 class TronIndexerService(BaseIndexerService):
     chain_name = "tron"
@@ -28,3 +31,10 @@ class TronIndexerService(BaseIndexerService):
 
     async def get_chain_head(self) -> int:
         return await self.block_scanner.get_chain_head()
+
+    async def upsert_block_record(self, height: int, blk: Any) -> None:
+        await self.db_writer.upsert_tron_block_record(
+            block_number=height,
+            block_hash=getattr(blk, "block_hash", None),
+            timestamp_ms=getattr(blk, "timestamp_ms", None),
+        )

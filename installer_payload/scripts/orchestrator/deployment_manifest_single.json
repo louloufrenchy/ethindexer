@@ -1,9 +1,0 @@
-{
-    "ssh_user": "forensicuser",
-    "ssh_key": "$env:USERPROFILE\\.ssh\\id_ed25519",
-    "installer_local_path": "C:\\development\\forensic_tracer_installer_project_root\\Output\\ForensicSuiteV2-Setup.exe",
-    "remote_installer_path": "C:\\Temp\\ForensicSuiteV2-Setup.exe",
-    "hosts": [
-        { "ip": "192.168.0.199" }
-    ]
-}

@@ -1,11 +1,7 @@
 import argparse
 import subprocess
 from pathlib import Path
-<<<<<<< HEAD
-from forensic_suite_v2.core.logging import get_logger
-=======
 from forensic_suite_v2.core.fs_logging import get_logger
->>>>>>> master
 from forensic_suite_v2.scripts.healthcheck import run_healthcheck
 from forensic_suite_v2.scripts.operator_console import OperatorConsole
 

@@ -12,7 +12,7 @@ $ScriptRoot  = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot    = Split-Path -Parent $ScriptRoot
 $PayloadRoot = Join-Path $RepoRoot "installer_payload"
 
-$PythonRuntimeRoot = Join-Path $RepoRoot "forensic_suite_v2\runtime\python"
+$PythonRuntimeRoot = Join-Path $RepoRoot "runtime\python"
 $PayloadPythonRoot = Join-Path $PayloadRoot "python"
 
 Write-Host "=== Refreshing Installer Payload (Strict Allow-List, Authoritative) ===" -ForegroundColor Cyan

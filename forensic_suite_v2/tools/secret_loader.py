@@ -1,11 +1,7 @@
 import os, json
 from pathlib import Path
 
-<<<<<<< HEAD
-SECRET_PATH = Path(os.getenv("FORENSIC_SECRET_PATH", "C:/forensic_secrets/env.json"))
-=======
 SECRET_PATH = Path(os.getenv("FORENSIC_SECRET_PATH", "F:/forensic_secrets/env.json"))
->>>>>>> master
 
 def load_env():
     if not SECRET_PATH.exists():

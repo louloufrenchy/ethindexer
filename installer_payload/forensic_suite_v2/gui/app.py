@@ -2,6 +2,7 @@ from pathlib import Path
 import logging
 import sys
 import subprocess
+import yaml
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout,
@@ -14,19 +15,19 @@ from PySide6.QtCore import Qt
 from forensic_suite_v2.core.engine import Engine
 from forensic_suite_v2.core.plugin_loader import discover_plugins
 
-
 # ------------------------------------------------------------
-# 1. Detect installer root
+# 1. Detect installer root (site-packages forensic_suite_v2)
 # ------------------------------------------------------------
 def _find_install_root() -> Path:
     """
-    Walk upwards until we find a folder that looks like the installer root:
+    Walk upwards until we find a folder that looks like the package root:
     must contain 'dashboards' and 'scripts' directories.
     """
     p = Path(__file__).resolve()
     for parent in p.parents:
         if (parent / "dashboards").is_dir() and (parent / "scripts").is_dir():
             return parent
+    # Fallback: three levels up (repo layout)
     return Path(__file__).resolve().parents[3]
 
 
@@ -42,9 +43,32 @@ logging.basicConfig(
 
 
 # ------------------------------------------------------------
-# 2. Force PowerShell 5.1 for all script launches
+# 2. Config / chain detection
 # ------------------------------------------------------------
-POWERSHELL_51 = r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+def _load_indexer_config() -> dict:
+    """
+    Load indexer.yaml from the installed package root.
+    """
+    cfg_path = INSTALL_ROOT / "config" / "indexer.yaml"
+    if not cfg_path.exists():
+        raise FileNotFoundError(f"Indexer config not found: {cfg_path}")
+    with open(cfg_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def _get_enabled_chains(cfg: dict) -> list[str]:
+    """
+    Return list of enabled chains based on indexer.yaml.
+    If none explicitly enabled, fall back to all known chains.
+    """
+    chains: list[str] = []
+    for chain in ["btc", "eth", "tron"]:
+        section = cfg.get(chain)
+        if section and bool(section.get("enabled", False)):
+            chains.append(chain)
+    if not chains:
+        chains = ["btc", "eth", "tron"]
+    return chains
 
 
 # ------------------------------------------------------------
@@ -108,7 +132,7 @@ class TracerConsole(QDialog):
 
 
 # ------------------------------------------------------------
-# 5. Main Cockpit Window
+# 5. Main Cockpit Window (chain-aware, Python dashboards)
 # ------------------------------------------------------------
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -119,7 +143,25 @@ class MainWindow(QMainWindow):
         if icon_path.exists():
             self.setWindowIcon(QIcon(str(icon_path)))
 
+        # Load config and detect enabled chains
+        try:
+            self._cfg = _load_indexer_config()
+        except Exception as exc:
+            logging.exception("Failed to load indexer config")
+            QMessageBox.critical(self, "Config error", str(exc))
+            self._cfg = {}
+
+        self.enabled_chains = _get_enabled_chains(self._cfg)
+
+        # Engine + plugin filtering by enabled chains
         self.engine = Engine()
+        self.engine.plugins = discover_plugins(enabled_chains=self.enabled_chains)
+        if self.engine.plugins:
+            self.engine.plugins = {
+                name: plugin
+                for name, plugin in self.engine.plugins.items()
+                if name in self.enabled_chains
+            }
 
         self._build_menu()
         self._build_central()
@@ -135,31 +177,16 @@ class MainWindow(QMainWindow):
 
         file_menu = menubar.addMenu("File")
         dashboards_menu = menubar.addMenu("Dashboards")
-        indexers_menu = menubar.addMenu("Indexers")
         tracer_menu = menubar.addMenu("Tracer")
 
         validate_action = file_menu.addAction("Validate Installation")
         validate_action.triggered.connect(self._validate_installation)
 
-        # Dashboards
-        for label, script in [
-            ("BTC Dashboard", "btc_dashboard.ps1"),
-            ("ETH Dashboard", "eth_dashboard.ps1"),
-            ("TRON Dashboard", "tron_dashboard.ps1"),
-            ("Multi-Chain Dashboard", "multi_chain_dashboard.ps1"),
-        ]:
-            action = dashboards_menu.addAction(label)
-            action.triggered.connect(
-                lambda _, s=script: self._run_ps_script("dashboards", s)
-            )
-
-        # Indexers
-        for chain in ["btc", "eth", "tron"]:
-            action = indexers_menu.addAction(f"Run {chain.upper()} Indexer")
-            action.triggered.connect(lambda _, c=chain: self._run_indexer(c))
-
-        run_all_action = indexers_menu.addAction("Run All Indexers")
-        run_all_action.triggered.connect(self._run_all_indexers)
+        # Only the unified multi-chain dashboard
+        multi_chain_action = dashboards_menu.addAction("Multi-Chain Dashboard")
+        multi_chain_action.triggered.connect(
+            lambda _: self._run_python_module("forensic_suite_v2.dashboards.forensic_dashboard_gui")
+        )
 
         tracer_action = tracer_menu.addAction("Open Tracer Console")
         tracer_action.triggered.connect(self._open_tracer_console)
@@ -182,30 +209,28 @@ class MainWindow(QMainWindow):
         validate_btn.clicked.connect(self._validate_installation)
         layout.addWidget(validate_btn)
 
+        # Tracers (from plugins, filtered by enabled chains)
         layout.addWidget(QLabel("Available Tracers:"))
-        for name, plugin in self.engine.plugins.items():
-            btn = QPushButton(f"Run tracer: {name.upper()}")
-            btn.clicked.connect(lambda _, c=name: self._run_tracer(c))
-            layout.addWidget(btn)
+        if self.engine.plugins:
+            for name, plugin in self.engine.plugins.items():
+                btn = QPushButton(f"Run tracer: {name.upper()}")
+                btn.clicked.connect(lambda _, c=name: self._run_tracer(c))
+                layout.addWidget(btn)
+        else:
+            layout.addWidget(QLabel("No tracers available (no plugins loaded)."))
 
+        # Dashboards (Python, chain-aware)
         layout.addWidget(QLabel("Dashboards:"))
-        for label, script in [
-            ("BTC Dashboard", "btc_dashboard.ps1"),
-            ("ETH Dashboard", "eth_dashboard.ps1"),
-            ("TRON Dashboard", "tron_dashboard.ps1"),
-            ("Multi-Chain Dashboard", "multi_chain_dashboard.ps1"),
-        ]:
-            btn = QPushButton(label)
-            btn.clicked.connect(lambda _, s=script: self._run_ps_script("dashboards", s))
-            layout.addWidget(btn)
+
+        # Only the unified multi-chain dashboard
+        btn_multi = QPushButton("Multi-Chain Dashboard")
+        btn_multi.clicked.connect(
+            lambda _: self._run_python_module("forensic_suite_v2.dashboards.forensic_dashboard_gui")
+        )
+        layout.addWidget(btn_multi)
 
         layout.addWidget(QLabel("Indexers:"))
-        row = QHBoxLayout()
-        for chain in ["btc", "eth", "tron"]:
-            btn = QPushButton(f"{chain.upper()} Indexer")
-            btn.clicked.connect(lambda _, c=chain: self._run_indexer(c))
-            row.addWidget(btn)
-        layout.addLayout(row)
+        layout.addWidget(QLabel("Indexers are managed as Windows services on each host."))
 
         central.setLayout(layout)
         self.setCentralWidget(central)
@@ -219,52 +244,19 @@ class MainWindow(QMainWindow):
         self.setStatusBar(status)
 
     # --------------------------------------------------------
-    # Script Launchers (FORCE POWERSHELL 5.1)
+    # Launch helpers (Python modules, not PowerShell)
     # --------------------------------------------------------
-    def _run_ps_script(self, subdir: str, filename: str):
-        script = INSTALL_ROOT / subdir / filename
-        logging.info(f"Launching PowerShell script: {script}")
-
-        if not script.exists():
-            msg = f"Script not found: {script}"
-            logging.error(msg)
-            QMessageBox.warning(self, "Script not found", msg)
-            return
-
-        subprocess.Popen([
-            POWERSHELL_51, "-ExecutionPolicy", "Bypass",
-            "-File", str(script)
-        ])
-
-    def _run_indexer(self, chain: str):
-        script = INSTALL_ROOT / "scripts" / f"run_{chain}_indexer.ps1"
-        logging.info(f"Launching indexer script: {script}")
-
-        if not script.exists():
-            msg = f"Indexer script not found: {script}"
-            logging.error(msg)
-            QMessageBox.warning(self, "Indexer not found", msg)
-            return
-
-        subprocess.Popen([
-            POWERSHELL_51, "-ExecutionPolicy", "Bypass",
-            "-File", str(script)
-        ])
-
-    def _run_all_indexers(self):
-        script = INSTALL_ROOT / "scripts" / "run_all_indexers.ps1"
-        logging.info(f"Launching all-indexers script: {script}")
-
-        if not script.exists():
-            msg = f"Run-all script not found: {script}"
-            logging.error(msg)
-            QMessageBox.warning(self, "Script not found", msg)
-            return
-
-        subprocess.Popen([
-            POWERSHELL_51, "-ExecutionPolicy", "Bypass",
-            "-File", str(script)
-        ])
+    def _run_python_module(self, module: str):
+        """
+        Launch a Python module in a separate process using the same interpreter.
+        """
+        logging.info(f"Launching Python module: {module}")
+        try:
+            subprocess.Popen([sys.executable, "-m", module])
+        except Exception as exc:
+            msg = f"Failed to launch module {module}: {exc}"
+            logging.exception(msg)
+            QMessageBox.critical(self, "Launch error", msg)
 
     # --------------------------------------------------------
     # Tracer + Validation
@@ -284,30 +276,25 @@ class MainWindow(QMainWindow):
         dlg.exec()
 
     def _validate_installation(self):
-        issues = []
+        issues: list[str] = []
 
-        for fname in [
-            "btc_dashboard.ps1",
-            "eth_dashboard.ps1",
-            "tron_dashboard.ps1",
-            "multi_chain_dashboard.ps1",
-        ]:
-            path = INSTALL_ROOT / "dashboards" / fname
+        # Config
+        cfg_path = INSTALL_ROOT / "config" / "indexer.yaml"
+        if not cfg_path.exists():
+            issues.append(f"Missing indexer config: {cfg_path}")
+
+        # Dashboards (Python)
+        dashboards = [
+            ("Multi-Chain Dashboard", INSTALL_ROOT / "dashboards" / "forensic_dashboard_gui.py"),
+        ]
+
+        for label, path in dashboards:
             if not path.exists():
-                issues.append(f"Missing dashboard: {path}")
+                issues.append(f"Missing dashboard ({label}): {path}")
 
-        for fname in [
-            "run_btc_indexer.ps1",
-            "run_eth_indexer.ps1",
-            "run_tron_indexer.ps1",
-            "run_all_indexers.ps1",
-        ]:
-            path = INSTALL_ROOT / "scripts" / fname
-            if not path.exists():
-                issues.append(f"Missing indexer script: {path}")
-
+        # Plugins
         if not self.engine.plugins:
-            issues.append("No plugins registered in Engine.")
+            issues.append("No plugins registered in Engine (no tracers available).")
 
         if issues:
             logging.warning("Validation issues:\n" + "\n".join(issues))
@@ -322,9 +309,10 @@ class MainWindow(QMainWindow):
             QMessageBox.information(
                 self,
                 "Validation successful",
-                "All required dashboards, scripts, and plugins are present.",
+                "All required dashboards, config, and plugins are present.",
             )
             self.statusBar().showMessage("Validation successful", 5000)
+
 
 if __name__ == "__main__":
     launch_gui()

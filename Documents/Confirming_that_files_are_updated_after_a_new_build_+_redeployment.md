@@ -15,7 +15,7 @@ A successful build and redeployment must ensure:
 - The **installer EXE** is rebuilt.
 - The **deployment target** receives the updated runtime files.
 - No stale or legacy files remain on the target machine.
-- Repo B reflects the new runtime state.
+- RepoB reflects the new runtime state.
 - The active blue/green slot contains the updated artifacts.
 
 The V9.3.3 pipeline guarantees determinism, but verification steps remain essential for operational confidence.
@@ -30,7 +30,7 @@ After running:
 Invoke‑BuildSuiteSafe
 ```
 
-verify the following in Repo A:
+verify the following in RepoB:
 
 ### **2.1 Wheel**
 Check:
@@ -85,7 +85,7 @@ Confirm:
 
 ---
 
-## 3. Confirming Repo B After Sync‑Dev
+## 3. Confirming RepoB After Sync‑Dev
 
 After running:
 
@@ -93,10 +93,10 @@ After running:
 Update‑ForensicSuiteDev -Apply
 ```
 
-or after `Repair‑Workspace`, verify Repo B:
+or after `Repair‑Workspace`, verify RepoB:
 
-### **3.1 Repo B Structure**
-Repo B must contain only:
+### **3.1 RepoB Structure**
+RepoB must contain only:
 
 ```
 scripts/
@@ -245,7 +245,7 @@ Use this checklist after every build + redeployment:
 - [ ] PyInstaller bundle rebuilt  
 - [ ] Installer payload refreshed  
 - [ ] Installer EXE rebuilt  
-- [ ] Repo B rebuilt via Sync‑Dev  
+- [ ] RepoB rebuilt via Sync‑Dev  
 - [ ] Combined Validator returns `0`  
 - [ ] DeployPreflight returns `0`  
 - [ ] Target machine contains updated wheel  
@@ -257,6 +257,6 @@ Use this checklist after every build + redeployment:
 
 ## 8. Summary
 
-The V9.3.3 pipeline ensures deterministic, reproducible updates across development, build, and deployment environments. By validating the wheel, payload, Repo B, and target machine, you can confirm with certainty that the new build is fully deployed and no stale artifacts remain.
+The V9.3.3 pipeline ensures deterministic, reproducible updates across development, build, and deployment environments. By validating the wheel, payload, RepoB, and target machine, you can confirm with certainty that the new build is fully deployed and no stale artifacts remain.
 
 ---

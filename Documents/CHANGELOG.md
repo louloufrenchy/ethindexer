@@ -1,23 +1,23 @@
 # CHANGELOG — Transition from February 2026 Architecture to V9.3.3 Deterministic Model  
 _Forensic Suite Development & Deployment Evolution_
 
-This changelog documents the architectural, operational, and validation changes made between the **February 2026 toolchain** and the modern **V9.3.3 deterministic model**. It captures the shift from a loosely structured, partially manual workflow to a fully validated, reproducible, wheel‑based runtime system with strict runtime mirroring and relaxed development‑time flexibility.
+This changelog documents the architectural, operational, and validation changes made between the **February 2026 toolchain** and the modern **V9.3.3 deterministic model**. It captures the shift from a loosely structured, partially manual workflow to a fully validated, reproducible, wheel‑based runtime system with strict runtime mirroring and relaxed development‑time flexibility.
 
 ---
 
 ## 1. Architectural Evolution
 
-### February 2026 Model
+### February 2026 Model
 - Mixed development/runtime structure.
-- Repo A and Repo B both contained overlapping sets of files.
+- RepoA and RepoB both contained overlapping sets of files.
 - Runtime behavior depended on source‑tree execution.
 - No strict separation between dev‑time and runtime artifacts.
 - Deployment relied on copying large folder trees.
 - No single authoritative validator.
 
 ### V9.3.3 Deterministic Model
-- Repo A is a **full development workspace** (relaxed rules).
-- Repo B is a **strict runtime‑only mirror** (wheel‑based).
+- RepoA is a **full development workspace** (relaxed rules).
+- RepoB is a **strict runtime‑only mirror** (wheel‑based).
 - Runtime execution is **wheel‑driven**, not source‑tree‑driven.
 - Deployment uses a **validated installer payload** and EXE.
 - All operations gated by a **single Combined Validator**.
@@ -29,14 +29,14 @@ This changelog documents the architectural, operational, and validation changes 
 
 ### February 2026 Model
 - Multiple validators with inconsistent rules.
-- Manual checks required for Repo A and Repo B.
+- Manual checks required for RepoA and RepoB.
 - No unified exit‑code model.
 - No strict enforcement of runtime‑only structure.
 
 ### V9.3.3 Deterministic Model
 - **Combined Validator** is the single source of truth.
-- Repo A validated with **relaxed rules**.
-- Repo B validated with **strict runtime‑only rules**.
+- RepoA validated with **relaxed rules**.
+- RepoB validated with **strict runtime‑only rules**.
 - All major commands call the validator through **Preflight**.
 - Clear exit codes for CI/CD and automation.
 
@@ -46,7 +46,7 @@ This changelog documents the architectural, operational, and validation changes 
 
 ### February 2026 Model
 - Sync‑Dev relied on mapping CSVs and exclusion lists.
-- Repo B often accumulated stale or dev‑time files.
+- RepoB often accumulated stale or dev‑time files.
 - No deterministic cleanup.
 - No post‑apply validation.
 
@@ -56,7 +56,7 @@ This changelog documents the architectural, operational, and validation changes 
   2. DryRun  
   3. Apply  
   4. Post‑Apply Validation  
-- Repo B is rebuilt from scratch using runtime‑only artifacts.
+- RepoB is rebuilt from scratch using runtime‑only artifacts.
 - No exclusions, no mapping CSVs, no legacy logic.
 - Guaranteed reproducibility across machines.
 
@@ -72,7 +72,7 @@ This changelog documents the architectural, operational, and validation changes 
 
 ### V9.3.3 Deterministic Model
 - **Invoke‑BuildSuiteSafe** enforces:
-  - Repo B cleanup  
+  - RepoB cleanup  
   - Preflight  
   - Wheel build  
   - PyInstaller build  
@@ -106,13 +106,13 @@ This changelog documents the architectural, operational, and validation changes 
 ## 6. Repo A and Repo B Separation
 
 ### February 2026 Model
-- Repo A and Repo B often drifted.
-- Repo B contained dev‑time files.
-- Repo A required manual cleanup.
+- RepoA and RepoB often drifted.
+- RepoB contained dev‑time files.
+- RepoA required manual cleanup.
 
 ### V9.3.3 Deterministic Model
-- Repo A is **relaxed**: can contain docs, tests, dashboards, tools.
-- Repo B is **strict**: runtime‑only, validated after every Sync‑Dev.
+- RepoA is **relaxed**: can contain docs, tests, dashboards, tools.
+- RepoB is **strict**: runtime‑only, validated after every Sync‑Dev.
 - Drift is impossible due to deterministic rebuilds.
 - Documentation in `Documents/` is safe and never syncs.
 
@@ -126,7 +126,7 @@ This changelog documents the architectural, operational, and validation changes 
 
 ### V9.3.3 Deterministic Model
 - **Repair‑Workspace** provides a guaranteed clean recovery:
-  - Clear Repo B  
+  - Clear RepoB  
   - Preflight  
   - Sync‑Dev Apply  
 - Always returns workspace to a known‑good state.
@@ -152,7 +152,7 @@ This changelog documents the architectural, operational, and validation changes 
   - Deterministic BuildSuiteSafe  
   - Validated deployment  
   - Blue/green slot model  
-- Outdated February 2026 documents replaced with modern equivalents.
+- Outdated February 2026 documents replaced with modern equivalents.
 
 ---
 
@@ -170,7 +170,7 @@ This changelog documents the architectural, operational, and validation changes 
 
 ## 10. Final Notes
 
-The transition from the February 2026 architecture to the V9.3.3 deterministic model represents a complete modernization of the Forensic Suite’s development, build, validation, and deployment workflows. The suite is now:
+The transition from the February 2026 architecture to the V9.3.3 deterministic model represents a complete modernization of the Forensic Suite’s development, build, validation, and deployment workflows. The suite is now:
 
 - More reliable  
 - More predictable  

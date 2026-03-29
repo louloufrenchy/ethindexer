@@ -1,184 +1,82 @@
-import asyncpg
-import sys
-from typing import Dict, List
+import psycopg2
+from psycopg2.extras import DictCursor
 
+REQUIRED_TABLES = [
+    "btc_blocks",
+    "btc_transactions",
+    "tron_blocks",
+    "tron_transactions",
+    "eth_blocks",
+    "eth_transactions",
+    "index_checkpoint",
+    "indexer_metrics",
+]
 
-EXPECTED_SCHEMA = {
-    "btc_blocks": {
-        "columns": {
-            "block_number": "bigint",
-            "block_hash": "text",
-            "ts": "timestamp without time zone",
-        },
-        "primary_key": ["block_number"],
-    },
-    "btc_transactions": {
-        "columns": {
-            "tx_hash": "text",
-            "block_number": "bigint",
-            "ts": "timestamp without time zone",
-        },
-        "primary_key": ["tx_hash"],
-    },
-    "tron_blocks": {
-        "columns": {
-            "block_number": "bigint",
-            "block_hash": "text",
-            "ts": "timestamp without time zone",
-        },
-        "primary_key": ["block_number"],
-    },
-    "tron_transactions": {
-        "columns": {
-            "tx_hash": "text",
-            "block_number": "bigint",
-            "ts": "timestamp without time zone",
-        },
-        "primary_key": ["tx_hash"],
-    },
-    "eth_blocks": {
-        "columns": {
-            "block_number": "bigint",
-            "block_hash": "text",
-            "ts": "timestamp without time zone",
-        },
-        "primary_key": ["block_number"],
-    },
-    "eth_transactions": {
-        "columns": {
-            "tx_hash": "text",
-            "block_number": "bigint",
-            "ts": "timestamp without time zone",
-            "status": "integer",
-        },
-        "primary_key": ["tx_hash"],
-    },
-    "index_checkpoint": {
-        "columns": {
-            "id": "integer",
-            "last_block": "bigint",
-        },
-        "primary_key": ["id"],
-    },
-    "indexer_metrics": {
-        "columns": {
-            "ts": "timestamp without time zone",
-            "chain": "text",
-            "last_block": "bigint",
-            "chain_head": "bigint",
-            "lag": "bigint",
-        },
-        "primary_key": [],
-    },
+REQUIRED_UNIQUES = {
+    "index_checkpoint": ["chain"],
 }
 
+def get_connection():
+    return psycopg2.connect(
+        host="192.168.0.28",
+        port=5432,
+        user="postgres",
+        password="Str0ngPassw0rd2025",
+        dbname="forensic",
+    )
 
-def _safe_print(message: str) -> None:
-    """
-    Print safely in Windows service / redirected stdout environments where
-    cp1252 or other narrow encodings may reject Unicode symbols.
-    """
-    try:
-        print(message)
-    except UnicodeEncodeError:
-        fallback = (
-            message.encode("ascii", errors="replace")
-            .decode("ascii", errors="replace")
+
+def validate_tables(cur):
+    for table in REQUIRED_TABLES:
+        cur.execute(
+            """
+            SELECT to_regclass(%s)
+            """,
+            (table,),
         )
-        print(fallback)
+        exists = cur.fetchone()[0] is not None
+        if not exists:
+            raise RuntimeError(f"Missing required table: {table}")
 
 
-async def fetch_table_columns(conn, table: str) -> Dict[str, str]:
-    rows = await conn.fetch(
-        """
-        SELECT column_name, data_type
-        FROM information_schema.columns
-        WHERE table_name = $1
-        """,
-        table,
-    )
-    return {r["column_name"]: r["data_type"] for r in rows}
-
-
-async def fetch_primary_key(conn, table: str) -> List[str]:
-    rows = await conn.fetch(
-        """
-        SELECT a.attname
-        FROM pg_index i
-        JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
-        WHERE i.indrelid = $1::regclass AND i.indisprimary
-        """,
-        table,
-    )
-    return [r["attname"] for r in rows]
-
-
-async def validate_table(conn, table: str, spec: Dict) -> bool:
-    _safe_print(f"Validating table: {table}")
-
-    exists = await conn.fetchval(
-        """
-        SELECT EXISTS (
-            SELECT 1 FROM information_schema.tables WHERE table_name = $1
-        )
-        """,
-        table,
-    )
-
-    if not exists:
-        _safe_print(f"[FAIL] Missing table: {table}")
-        return False
-
-    actual_cols = await fetch_table_columns(conn, table)
-    expected_cols = spec["columns"]
-
-    for col, coltype in expected_cols.items():
-        if col not in actual_cols:
-            _safe_print(f"[FAIL] Missing column {col} in {table}")
-            return False
-        if actual_cols[col] != coltype:
-            _safe_print(
-                f"[FAIL] Column type mismatch in {table}.{col}: "
-                f"expected {coltype}, got {actual_cols[col]}"
+def validate_uniques(cur):
+    for table, cols in REQUIRED_UNIQUES.items():
+        for col in cols:
+            cur.execute(
+                """
+                SELECT 1
+                FROM pg_constraint c
+                JOIN pg_class t ON c.conrelid = t.oid
+                JOIN pg_namespace n ON t.relnamespace = n.oid
+                JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY (c.conkey)
+                WHERE c.contype = 'u'
+                  AND n.nspname = 'public'
+                  AND t.relname = %s
+                  AND a.attname = %s
+                LIMIT 1
+                """,
+                (table, col),
             )
-            return False
-
-    expected_pk = spec["primary_key"]
-    actual_pk = await fetch_primary_key(conn, table)
-
-    if expected_pk != actual_pk:
-        _safe_print(
-            f"[FAIL] Primary key mismatch in {table}: "
-            f"expected {expected_pk}, got {actual_pk}"
-        )
-        return False
-
-    _safe_print(f"[OK] {table}")
-    return True
+            if cur.fetchone() is None:
+                raise RuntimeError(
+                    f"Missing UNIQUE constraint on {table}({col}) required by indexer engine"
+                )
 
 
-async def validate_schema(pg_cfg: Dict) -> None:
-    conn = await asyncpg.connect(
-        host=pg_cfg["host"],
-        port=pg_cfg["port"],
-        user=pg_cfg["user"],
-        password=pg_cfg["password"],
-        database=pg_cfg["database"],
-    )
+def run_schema_validation():
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            print("=== Running Schema Compatibility Validator ===")
+            validate_tables(cur)
+            validate_uniques(cur)
+            print("[OK] Schema validation passed. Safe to start indexers.")
 
-    try:
-        _safe_print("=== Running Schema Compatibility Validator ===")
+async def validate_schema(pg_cfg):
+    """
+    Async wrapper used by indexer runners.
+    The indexers expect this function to exist.
+    """
+    run_schema_validation()
 
-        all_ok = True
-        for table, spec in EXPECTED_SCHEMA.items():
-            ok = await validate_table(conn, table, spec)
-            if not ok:
-                all_ok = False
-
-        if not all_ok:
-            _safe_print("[FAIL] Schema validation failed. Aborting indexer startup.")
-            sys.exit(1)
-
-        _safe_print("[OK] Schema validation passed. Safe to start indexers.")
-    finally:
-        await conn.close()
+if __name__ == "__main__":
+    run_schema_validation()

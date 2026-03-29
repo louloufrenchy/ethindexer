@@ -1,16 +1,4 @@
 # =====================================================================
-<<<<<<< HEAD
-# Hardened Installer Sandbox Test (V3)
-# =====================================================================
-$primaryRoot = "C:\development\forensic_tracer_installer_project_root"
-$testRoot = "C:\ForensicSuite_TestRun"
-$payloadSrc = Join-Path $primaryRoot "installer_payload"
-
-# 1. Break the lock and purge
-Set-Location $primaryRoot
-if (Test-Path $testRoot) {
-    Write-Host ">>> Purging stale sandbox..." -ForegroundColor Gray
-=======
 # Hardened Installer Sandbox Test (V5 - True Production Mirror)
 # =====================================================================
 $primaryRoot = "F:\DEVELOPMENT\Repo_A\forensic_tracer_installer_project_root"
@@ -30,28 +18,10 @@ if (Test-Path $testRoot) {
     Stop-Service btc_indexer  -Force -ErrorAction SilentlyContinue
     Stop-Service eth_indexer  -Force -ErrorAction SilentlyContinue
     Stop-Service tron_indexer -Force -ErrorAction SilentlyContinue
->>>>>>> master
     Remove-Item -Recurse -Force $testRoot -ErrorAction SilentlyContinue
 }
 New-Item -ItemType Directory -Path $testRoot -Force | Out-Null
 
-<<<<<<< HEAD
-# 2. Stage the payload
-Write-Host ">>> Staging files to $testRoot..." -ForegroundColor Cyan
-Copy-Item -Path "$payloadSrc\*" -Destination $testRoot -Recurse -Force
-
-# 3. Drop secrets template
-$secretRoot = "C:\forensic_secrets"
-if (!(Test-Path $secretRoot)) { New-Item -ItemType Directory -Path $secretRoot | Out-Null }
-$template = Join-Path $payloadSrc "dot_env.template"
-$target = Join-Path $secretRoot "env.json"
-if (!(Test-Path $target)) { Copy-Item $template $target }
-
-# 4. Execute the Active Bootstrap
-Write-Host ">>> Starting Hardened Bootstrap Test..." -ForegroundColor Green
-Push-Location $testRoot
-try {
-=======
 # 3. Stage the payload
 Write-Host ">>> Staging files to $testRoot..." -ForegroundColor Cyan
 Copy-Item -Path "$payloadSrc\*" -Destination $testRoot -Recurse -Force
@@ -75,17 +45,11 @@ Write-Host ">>> Starting Hardened Bootstrap Test..." -ForegroundColor Green
 Push-Location $testRoot
 try {
     Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
->>>>>>> master
     .\bootstrap.ps1
 } finally {
     Pop-Location
 }
 
-<<<<<<< HEAD
-# 5. Final Verification
-Write-Host "`n=== Post-Test Verification ===" -ForegroundColor Cyan
-$checks = @("venv\Scripts\python.exe", "logs", "dot_env.template")
-=======
 # 6. Final Verification (Authoritative Tree Check - slot level)
 Write-Host "`n=== Authoritative Tree Verification ===" -ForegroundColor Cyan
 $checks = @(
@@ -93,14 +57,10 @@ $checks = @(
     "venv\Scripts\forensic-suite-v2-run-tron-indexer.exe",
     "config\tracer_v2.yaml"
 )
->>>>>>> master
 foreach ($path in $checks) {
     if (Test-Path (Join-Path $testRoot $path)) {
         Write-Host "[PASS] Verified: $path" -ForegroundColor Green
     } else {
-<<<<<<< HEAD
-        Write-Host "[FAIL] Missing: $path" -ForegroundColor Red
-=======
         Write-Host "[FAIL] Missing authoritative path: $path" -ForegroundColor Red
     }
 }
@@ -143,6 +103,5 @@ foreach ($svc in $services) {
         Write-Host "[PASS] $svc is RUNNING." -ForegroundColor Green
     } else {
         Write-Host "[FAIL] $svc is $status. Check Event Viewer." -ForegroundColor Red
->>>>>>> master
     }
 }

@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
-    Installs all Forensic Suite V2 Windows services using NSSM.
+    Installs Forensic Suite V2 Windows services using NSSM, based on enabled chains in indexer.yaml.
 
 .DESCRIPTION
     - Detects active suite root (blue/green aware)
-    - Installs btc_indexer, eth_indexer, tron_indexer, forensic_orchestrator
-    - Uses NSSM so normal Python/PowerShell scripts can run reliably as services
-    - Creates runtime state and log directories
-    - Prefers slot-local Python runtime
+    - Reads forensic_suite_v2\config\indexer.yaml
+    - Installs ONLY enabled chain services (btc / eth / tron)
+    - Always installs forensic_orchestrator
+    - Loads secrets from C:\forensic_secrets\.env into each service environment
     - Safe to run repeatedly
 #>
 
@@ -17,17 +17,52 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-Write-Host "`n=== Installing Forensic Suite services (NSSM) ===" -ForegroundColor Cyan
+Write-Host "`n=== Installing Forensic Suite services (NSSM, YAML-aware) ===" -ForegroundColor Cyan
 
-# ---------------------------------------------------------------------
-# Resolve suite root (slot-aware)
-# This script lives at:
-#   C:\forensic_suite_v2_<slot>\forensic_suite_v2\scripts\install_services.ps1
-# So:
-#   $ScriptRoot   = ...\forensic_suite_v2\scripts
-#   $PackageRoot  = ...\forensic_suite_v2
-#   $ResolvedRoot = ...\forensic_suite_v2_<slot>
-# ---------------------------------------------------------------------
+function Get-EnvFileEntries {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    if (-not (Test-Path $Path)) {
+        throw ".env file not found: $Path"
+    }
+
+    $entries = @()
+
+    foreach ($line in Get-Content $Path) {
+        $trimmed = $line.Trim()
+
+        if ([string]::IsNullOrWhiteSpace($trimmed)) { continue }
+        if ($trimmed.StartsWith('#')) { continue }
+        if ($trimmed -notmatch '=') { continue }
+
+        $name, $value = $trimmed.Split('=', 2)
+        $name = $name.Trim()
+        $value = $value.Trim()
+
+        if (-not [string]::IsNullOrWhiteSpace($name)) {
+            $entries += ('{0}={1}' -f $name, $value)
+        }
+    }
+
+    return $entries
+}
+
+function Test-ChainEnabled {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$YamlText,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('btc','eth','tron')]
+        [string]$Chain
+    )
+
+    return ($YamlText -match ("(?ms)^" + [regex]::Escape($Chain) + ":\r?\n.*?^\s*enabled:\s*true\s*$"))
+}
+
 $ScriptRoot   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PackageRoot  = Split-Path -Parent $ScriptRoot
 $ResolvedRoot = Split-Path -Parent $PackageRoot
@@ -36,32 +71,25 @@ Write-Host "ScriptRoot   : $ScriptRoot"   -ForegroundColor DarkGray
 Write-Host "PackageRoot  : $PackageRoot"  -ForegroundColor DarkGray
 Write-Host "ResolvedRoot : $ResolvedRoot" -ForegroundColor DarkGray
 
-# ---------------------------------------------------------------------
-# Fixed roots (shared across slots)
-# ---------------------------------------------------------------------
-$LogsRoot  = "C:\forensic_suite_logs"
-$StateRoot = "C:\forensic_state"
+$LogsRoot    = "C:\forensic_suite_logs"
+$StateRoot   = "C:\forensic_state"
+$SecretsRoot = "C:\forensic_secrets"
+$EnvFile     = Join-Path $SecretsRoot ".env"
+$ConfigPath  = Join-Path $ResolvedRoot "forensic_suite_v2\config\indexer.yaml"
 
-# NSSM and Python are shipped inside the suite payload
 $NssmExe   = Join-Path $ResolvedRoot "tools\nssm\nssm.exe"
 $PyExeSlot = Join-Path $ResolvedRoot "python\python.exe"
 
-# Optional venv inside the slot (if you ever add it)
 $VenvRoot   = Join-Path $ResolvedRoot "venv"
 $VenvPython = Join-Path $VenvRoot "Scripts\python.exe"
 
-# ---------------------------------------------------------------------
-# Ensure runtime directories
-# ---------------------------------------------------------------------
 New-Item -ItemType Directory -Path $StateRoot -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $StateRoot "btc") -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $StateRoot "eth") -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $StateRoot "tron") -Force | Out-Null
 New-Item -ItemType Directory -Path $LogsRoot -Force | Out-Null
+New-Item -ItemType Directory -Path $SecretsRoot -Force | Out-Null
 
-# ---------------------------------------------------------------------
-# Resolve Python (prefer slot-local venv, then slot-local runtime)
-# ---------------------------------------------------------------------
 if (Test-Path $VenvPython) {
     $PythonExe = $VenvPython
     Write-Host "[OK] Using slot-local venv Python: $PythonExe" -ForegroundColor Green
@@ -74,42 +102,81 @@ else {
     throw "No Python runtime found. Expected either venv at '$VenvPython' or slot runtime at '$PyExeSlot'."
 }
 
-# ---------------------------------------------------------------------
-# Validate NSSM
-# ---------------------------------------------------------------------
 if (-not (Test-Path $NssmExe)) {
     throw "NSSM executable not found at $NssmExe"
 }
 
-Write-Host "Using NSSM   : $NssmExe"   -ForegroundColor Yellow
-Write-Host "Logs root    : $LogsRoot"  -ForegroundColor Yellow
-Write-Host "State root   : $StateRoot" -ForegroundColor Yellow
+if (-not (Test-Path $ConfigPath)) {
+    throw "indexer.yaml not found at $ConfigPath"
+}
 
-# ---------------------------------------------------------------------
-# Service definitions (slot-aware via $ResolvedRoot)
-# ---------------------------------------------------------------------
-$services = @(
-    @{
+$EnvEntries = Get-EnvFileEntries -Path $EnvFile
+$YamlText   = Get-Content $ConfigPath -Raw
+
+$btcEnabled  = Test-ChainEnabled -YamlText $YamlText -Chain 'btc'
+$ethEnabled  = Test-ChainEnabled -YamlText $YamlText -Chain 'eth'
+$tronEnabled = Test-ChainEnabled -YamlText $YamlText -Chain 'tron'
+
+Write-Host "Using NSSM   : $NssmExe"    -ForegroundColor Yellow
+Write-Host "Logs root    : $LogsRoot"   -ForegroundColor Yellow
+Write-Host "State root   : $StateRoot"  -ForegroundColor Yellow
+Write-Host "Secrets file : $EnvFile"    -ForegroundColor Yellow
+Write-Host "Env entries  : $($EnvEntries.Count)" -ForegroundColor Yellow
+Write-Host "Config file  : $ConfigPath" -ForegroundColor Yellow
+Write-Host ("Enabled      : btc={0} eth={1} tron={2}" -f $btcEnabled, $ethEnabled, $tronEnabled) -ForegroundColor Yellow
+
+$services = @()
+
+if ($btcEnabled) {
+    $services += @{
         Name   = "btc_indexer"
         Script = "forensic_suite_v2\btc_indexer\services\run_btc_indexer_v2.py"
         Type   = "python"
-    },
-    @{
+    }
+}
+
+if ($ethEnabled) {
+    $services += @{
         Name   = "eth_indexer"
         Script = "forensic_suite_v2\eth_indexer\services\run_eth_indexer_v2.py"
         Type   = "python"
-    },
-    @{
+    }
+}
+
+if ($tronEnabled) {
+    $services += @{
         Name   = "tron_indexer"
         Script = "forensic_suite_v2\tron_indexer\services\run_tron_indexer_v2.py"
         Type   = "python"
-    },
-    @{
-        Name   = "forensic_orchestrator"
-        Script = "forensic_suite_v2\scripts\windows_orchestrator_service.ps1"
-        Type   = "powershell"
     }
-)
+}
+
+$services += @{
+    Name   = "forensic_orchestrator"
+    Script = "forensic_suite_v2\scripts\windows_orchestrator_service.ps1"
+    Type   = "powershell"
+}
+
+$allChainServices = @('btc_indexer', 'eth_indexer', 'tron_indexer')
+$enabledNames = @($services | ForEach-Object { $_.Name })
+
+foreach ($svcName in $allChainServices) {
+    if ($enabledNames -contains $svcName) { continue }
+
+    $existing = Get-Service $svcName -ErrorAction SilentlyContinue
+    if ($existing) {
+        Write-Host ("`n--- Removing disabled service {0} ---" -f $svcName) -ForegroundColor Yellow
+
+        try {
+            Stop-Service $svcName -Force -ErrorAction SilentlyContinue
+        }
+        catch {
+        }
+
+        & sc.exe delete $svcName | Out-Null
+        Start-Sleep -Seconds 2
+    }
+}
 
 foreach ($svc in $services) {
     $svcName    = $svc.Name
@@ -122,7 +189,6 @@ foreach ($svc in $services) {
 
     Write-Host ("`n--- Installing {0} ---" -f $svcName) -ForegroundColor Green
 
-    # Remove existing service if present
     $existing = Get-Service $svcName -ErrorAction SilentlyContinue
     if ($existing) {
         try {
@@ -135,25 +201,31 @@ foreach ($svc in $services) {
         Start-Sleep -Seconds 2
     }
 
-    # Install via NSSM
     if ($svc.Type -eq "powershell") {
         & $NssmExe install $svcName "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" | Out-Null
         & $NssmExe set $svcName AppParameters ('-NoProfile -ExecutionPolicy Bypass -File "{0}"' -f $scriptPath) | Out-Null
         $appDirectory = Join-Path $ResolvedRoot "forensic_suite_v2"
+        $pythonPathRoot = $ResolvedRoot
     }
     else {
         & $NssmExe install $svcName $PythonExe | Out-Null
         & $NssmExe set $svcName AppParameters ('"{0}"' -f $scriptPath) | Out-Null
         $appDirectory = $ResolvedRoot
+        $pythonPathRoot = $ResolvedRoot
     }
+
+    $AppEnv = @(
+        "PYTHONPATH=$pythonPathRoot"
+        "PYTHONUNBUFFERED=1"
+        "PYTHONIOENCODING=utf-8"
+        "VIRTUAL_ENV=$VenvRoot"
+    ) + $EnvEntries
 
     & $NssmExe set $svcName AppDirectory $appDirectory | Out-Null
     & $NssmExe set $svcName Start SERVICE_AUTO_START | Out-Null
     & $NssmExe set $svcName AppExit Default Restart | Out-Null
-    & $NssmExe set $svcName AppEnvironmentExtra `
-        "PYTHONPATH=$ResolvedRoot" `
-        "PYTHONUNBUFFERED=1" `
-        "VIRTUAL_ENV=$VenvRoot" | Out-Null
+    & $NssmExe set $svcName AppEnvironment "" | Out-Null
+    & $NssmExe set $svcName AppEnvironmentExtra @AppEnv | Out-Null
     & $NssmExe set $svcName AppStdout (Join-Path $LogsRoot "$svcName.out.log") | Out-Null
     & $NssmExe set $svcName AppStderr (Join-Path $LogsRoot "$svcName.err.log") | Out-Null
 
@@ -171,7 +243,7 @@ foreach ($svc in $services) {
         Start-Sleep -Seconds 2
 
         $started = Get-Service $svcName -ErrorAction SilentlyContinue
-        if ($started -and $started.Status -eq 'Running') {
+        if ($started -and ($started.Status -eq 'Running' -or $started.Status -eq 'StartPending')) {
             Write-Host ("Started {0}" -f $svcName) -ForegroundColor Cyan
         }
         else {

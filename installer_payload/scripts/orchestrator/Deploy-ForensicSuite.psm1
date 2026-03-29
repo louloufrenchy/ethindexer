@@ -2,11 +2,7 @@
 
 $Script:PrivateKey = "$env:USERPROFILE\.ssh\id_ed25519"
 $Script:SshUser    = "forensicuser"
-<<<<<<< HEAD
-$Script:InstallerLocalPath = "C:\development\forensic_tracer_installer_project_root\installer_payload\ForensicSuiteV2-Setup.exe"
-=======
 $Script:InstallerLocalPath = "F:\DEVELOPMENT\Repo_A\forensic_tracer_installer_project_root\installer_payload\ForensicSuiteV2-Setup.exe"
->>>>>>> master
 $Script:RemoteInstallerPath = "C:\Temp\ForensicSuiteV2-Setup.exe"
 
 function Invoke-Ssh {

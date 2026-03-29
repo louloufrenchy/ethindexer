@@ -135,3 +135,31 @@ tmp/
 temp/
 _temp_installed/
 temp_installed/
+
+# --- Installer payload (full payload must never be committed) ---
+installer_payload/python/
+installer_payload/forensic_suite_v2/
+installer_payload/dashboards/
+installer_payload/database/
+installer_payload/common/
+installer_payload/tracer/
+installer_payload/legacy/
+installer_payload/*.zip
+installer_payload/*.exe
+installer_payload/*.msi
+installer_payload/*.whl
+
+# --- Runtime tree (never commit runtime) ---
+runtime/
+
+# --- Legacy folders ---
+legacy/
+
+# --- Backups and CSV dumps ---
+*.csv
+*.bak
+backup_*/
+backup_forensic_suite_v2_*/
+
+# --- Wheel inspection and other dev artifacts ---
+wheel_inspect/

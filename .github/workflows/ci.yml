@@ -10,6 +10,9 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
 
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,7 +30,6 @@ jobs:
 
       - name: Validate plugins
         run: |
-          export PYTHONPATH=$PYTHONPATH:$(pwd)
           python forensic_suite_v2/tools/validate_plugins.py
 
       - name: Run unit tests

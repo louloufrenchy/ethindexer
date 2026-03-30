@@ -1,3 +1,6 @@
+import pytest
+pytest.skip("Requires local Postgres; skipped in CI", allow_module_level=True)
+
 import psycopg2
 import json
 from pathlib import Path

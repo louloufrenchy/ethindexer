@@ -27,6 +27,7 @@ jobs:
 
       - name: Validate plugins
         run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
           python forensic_suite_v2/tools/validate_plugins.py
 
       - name: Run unit tests

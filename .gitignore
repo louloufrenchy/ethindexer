@@ -163,3 +163,5 @@ backup_forensic_suite_v2_*/
 
 # --- Wheel inspection and other dev artifacts ---
 wheel_inspect/
+
+bigobjects.txt
